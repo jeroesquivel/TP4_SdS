@@ -1,6 +1,6 @@
 package ar.edu.itba.sds.sistema1.integrators;
 
-import ar.edu.itba.sds.sistema1.Oscillator;
+import ar.edu.itba.sds.sistema1.core.Oscillator;
 
 public final class EulerIntegrator implements Integrator {
     private final double dt;

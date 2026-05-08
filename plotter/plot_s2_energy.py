@@ -3,9 +3,9 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, Normalize
 from matplotlib.cm import ScalarMappable
-from _style import RESULTS, FIGURES, GRADIENT_CMAP
+from _style import RESULTS, FIGURES, GRADIENT_CMAP, plain_n_colorbar
 
 get_cmap = plt.get_cmap
 
@@ -75,7 +75,7 @@ def panel_stability(ax, files, cmap):
         return None
 
     Ns = [r[0] for r in rows]
-    norm = LogNorm(vmin=min(Ns), vmax=max(Ns)) if len(Ns) >= 2 else None
+    norm = Normalize(vmin=min(Ns), vmax=max(Ns)) if len(Ns) >= 2 else None
 
     t_max = 0.0
     for N, f in rows:
@@ -151,6 +151,10 @@ def main(argv):
         sm = ScalarMappable(norm=norm_jvn, cmap=cmap); sm.set_array([])
         cbar = fig.colorbar(sm, ax=axes[1], fraction=0.06, pad=0.02)
         cbar.set_label("N")
+        Ns_jvn = sorted({int(RE_JVN.search(f.name).group(1))
+                         for f in files
+                         if RE_JVN.search(f.name) and int(RE_JVN.search(f.name).group(2)) == 0})
+        plain_n_colorbar(cbar, Ns_jvn)
     if norm_ksw is not None:
         sm = ScalarMappable(norm=norm_ksw, cmap=cmap); sm.set_array([])
         cbar = fig.colorbar(sm, ax=axes[2], fraction=0.06, pad=0.02)
@@ -160,7 +164,7 @@ def main(argv):
                  y=1.00, fontsize=14)
 
     fig.subplots_adjust(wspace=0.36)
-    out = FIGURES / "s2_energy.png"
+    out = FIGURES / "03_s2_energy.png"
     fig.savefig(out)
     print("→", out)
 

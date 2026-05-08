@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.cm import ScalarMappable
-from _style import RESULTS, FIGURES, GRADIENT_CMAP
+from _style import RESULTS, FIGURES, GRADIENT_CMAP, plain_log_axis
 
 get_cmap = plt.get_cmap
 
@@ -37,10 +37,11 @@ def main():
         axes[1].plot(sub["N"], sub["J_in_S2_mean"], "s-", color=c, lw=1.8,
                      markersize=7, markerfacecolor="white", markeredgewidth=1.6)
 
+    Ns_all = sorted(df["N"].unique())
     for ax in axes:
         ax.set_xlabel("N")
-        ax.set_xscale("log")
         ax.margins(y=0.10)
+        plain_log_axis(ax.xaxis, Ns_all)
 
     axes[0].set_ylabel(r"$\langle J \rangle$  [partículas / s]")
     axes[0].set_title(r"Scanning rate global  $\langle J \rangle (N, k)$")
@@ -54,7 +55,7 @@ def main():
     fig.suptitle(r"Variación con la rigidez k  —  M=10 realizaciones,  t$_f$=500 s",
                  y=0.995, fontsize=14)
 
-    out = FIGURES / "s2_k_sweep.png"
+    out = FIGURES / "09_s2_k_sweep.png"
     fig.savefig(out)
     print("→", out)
 
@@ -72,6 +73,11 @@ def main():
     fig2, ax = plt.subplots(figsize=(9.0, 5.4))
     ax.set_xscale("log")
     ax.set_xlabel("k [N/m]")
+    k_lo, k_hi = float(s["k"].min()), float(s["k"].max())
+    ax.set_xlim(k_lo / 1.6, k_hi * 1.6)
+    ax.set_xticks(list(s["k"]))
+    ax.set_xticklabels([k_label(k) for k in s["k"]])
+    ax.minorticks_off()
 
     l1 = ax.errorbar(s["k"], s["max_J"], yerr=s["max_J_std"],
                      fmt="o-", color="#1f77b4", ecolor="#1f77b4",
@@ -98,7 +104,7 @@ def main():
 
     ax.set_title("Escalar característico vs. k")
 
-    out2 = FIGURES / "s2_k_scalar.png"
+    out2 = FIGURES / "10_s2_k_scalar.png"
     fig2.savefig(out2)
     print("→", out2)
 

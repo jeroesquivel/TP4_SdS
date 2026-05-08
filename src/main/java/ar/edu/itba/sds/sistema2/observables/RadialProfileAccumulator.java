@@ -1,7 +1,7 @@
 package ar.edu.itba.sds.sistema2.observables;
 
-import ar.edu.itba.sds.sistema2.Geometry;
-import ar.edu.itba.sds.sistema2.Particle;
+import ar.edu.itba.sds.sistema2.core.Geometry;
+import ar.edu.itba.sds.sistema2.core.Particle;
 
 import java.util.List;
 

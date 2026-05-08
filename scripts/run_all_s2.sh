@@ -41,9 +41,9 @@ run_stage() {
 run_stage ENERGY_K1E2 "--experiment energy --N 100 --k 100   --tf 5"
 run_stage ENERGY_K1E3 "--experiment energy --N 100 --k 1000  --tf 5"
 run_stage ENERGY_K1E4 "--experiment energy --N 100 --k 10000 --tf 5"
-run_stage TIMING "--experiment timing --Ns 100,200,400,800,1000 --tf 500 --k 1000"
-run_stage JVSN   "--experiment jvsn --Ns 10,20,50,100,200,400,800,1000 --tf 500 --k 1000 --realizations 10"
-run_stage KSWEEP "--experiment ksweep --ks 100,1000,10000 --Ns 10,20,50,100,200,400,800,1000 --tf 500 --realizations 10"
+run_stage TIMING "--experiment timing --Ns 100,200,300,400,500,600,700,800,900,1000 --tf 500 --k 1000"
+run_stage JVSN   "--experiment jvsn --Ns 100,200,300,400,500,600,700,800,900,1000 --tf 500 --k 1000 --realizations 10"
+run_stage KSWEEP "--experiment ksweep --ks 100,1000,10000 --Ns 100,200,300,400,500,600,700,800,900,1000 --tf 500 --realizations 10"
 
 T_TOTAL=$((SECONDS - T_GLOBAL_START))
 

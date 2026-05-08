@@ -27,9 +27,9 @@ run_stage() {
 }
 
 run_stage ENERGY "--experiment energy --N 100 --k 1000 --tf 5"
-run_stage TIMING "--experiment timing --Ns 50,100,200 --tf 10 --k 1000"
-run_stage JVSN   "--experiment jvsn --Ns 50,100 --tf 10 --k 1000 --realizations 2"
-run_stage KSWEEP "--experiment ksweep --ks 100,1000 --Ns 50,100 --tf 10 --realizations 2"
+run_stage TIMING "--experiment timing --Ns 100,200,300 --tf 10 --k 1000"
+run_stage JVSN   "--experiment jvsn --Ns 100,200 --tf 10 --k 1000 --realizations 2"
+run_stage KSWEEP "--experiment ksweep --ks 100,1000 --Ns 100,200 --tf 10 --realizations 2"
 
 T_TOTAL=$((SECONDS - T_GLOBAL_START))
 format_hms() { printf "%02d:%02d:%02d" $(($1/3600)) $((($1%3600)/60)) $(($1%60)); }

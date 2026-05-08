@@ -1,6 +1,8 @@
-package ar.edu.itba.sds.sistema2;
+package ar.edu.itba.sds.sistema2.sim;
 
+import ar.edu.itba.sds.sistema2.core.Particle;
 import ar.edu.itba.sds.sistema2.integrators.Integrator2D;
+import ar.edu.itba.sds.sistema2.physics.ForceModel;
 
 import java.util.List;
 

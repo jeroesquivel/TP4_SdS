@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from _style import RESULTS, FIGURES, TP3_DATA
+from _style import RESULTS, FIGURES, TP3_DATA, plain_log_axis
 
 
 def main():
@@ -25,11 +25,11 @@ def main():
     ax.set_xlabel("N")
     ax.set_ylabel(r"$\langle J \rangle$  [partículas / s]")
     ax.set_title(r"Scanning rate  $\langle J \rangle$  vs.  N")
-    ax.set_xscale("log")
+    plain_log_axis(ax.xaxis, sorted(df["N"]))
     ax.margins(y=0.10)
     ax.legend(loc="upper left", frameon=True, framealpha=0.95, handlelength=2.2)
 
-    out = FIGURES / "s2_j_vs_n.png"
+    out = FIGURES / "06_s2_j_vs_n.png"
     fig.savefig(out)
     print("→", out)
 

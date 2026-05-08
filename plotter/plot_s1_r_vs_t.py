@@ -12,53 +12,43 @@ INTEGRATORS = [
 
 def main():
     s1 = RESULTS / "s1"
-    fig, axes = plt.subplots(2, 1, figsize=(10.0, 6.8),
-                             gridspec_kw={"height_ratios": [1.0, 1.0], "hspace": 0.36})
+    fig, axes = plt.subplots(2, 2, figsize=(11.0, 6.8), sharex=True, sharey=True)
 
-    # Panel superior: r(t) completo
-    ax_top = axes[0]
-    ana_plotted = False
     t_max = 5.0
-    handles, labels = [], []
-    for key, label, color in INTEGRATORS:
+    y_lo = 0.0
+    y_hi = 0.0
+    for (key, label, color), ax in zip(INTEGRATORS, axes.flat):
         f = s1 / f"trajectory_{key}_dt1e-03.csv"
         if not f.exists():
-            print(f"missing {f}"); continue
+            ax.set_title(f"{label}  (sin datos)")
+            ax.text(0.5, 0.5, "missing", ha="center", va="center",
+                    transform=ax.transAxes, color="dimgray")
+            continue
         df = pd.read_csv(f)
-        if not ana_plotted:
-            l_ana, = ax_top.plot(df["t"], df["r_ana"], color="black", lw=2.4,
-                                 label="Analítica", zorder=10)
-            handles.append(l_ana); labels.append("Analítica")
-            ana_plotted = True
-        l_num, = ax_top.plot(df["t"], df["r_num"], color=color, lw=1.3,
-                             label=label, alpha=0.9)
-        handles.append(l_num); labels.append(label)
+        ax.plot(df["t"], df["r_ana"], color="black", lw=2.2,
+                label="Analítica", zorder=1)
+        ax.plot(df["t"], df["r_num"], color=color, lw=1.6,
+                label=label, alpha=1.0, zorder=10)
+        ax.set_title(label)
+        ax.legend(loc="upper right", frameon=True, framealpha=0.92,
+                  handlelength=2.0, fontsize=10)
         t_max = df["t"].max()
-    ax_top.set_xlabel("t [s]")
-    ax_top.set_ylabel("r [m]")
-    ax_top.set_xlim(0, t_max)
-    ax_top.set_title(r"Trayectoria r(t) — $\Delta t = 10^{-3}$ s")
+        y_lo = min(y_lo, df["r_num"].min(), df["r_ana"].min())
+        y_hi = max(y_hi, df["r_num"].max(), df["r_ana"].max())
 
-    # Panel inferior: error (r_num - r_ana)
-    ax_bot = axes[1]
-    for key, label, color in INTEGRATORS:
-        f = s1 / f"trajectory_{key}_dt1e-03.csv"
-        if not f.exists(): continue
-        df = pd.read_csv(f)
-        err = df["r_num"] - df["r_ana"]
-        ax_bot.plot(df["t"], err, color=color, lw=1.4, alpha=0.95)
-    ax_bot.axhline(0.0, color="black", lw=0.9, alpha=0.4)
-    ax_bot.set_xlabel("t [s]")
-    ax_bot.set_ylabel(r"$r_{num}(t) - r_{ana}(t)$ [m]")
-    ax_bot.set_xlim(0, t_max)
-    ax_bot.set_title("Error puntual respecto de la solución analítica")
+    for ax in axes.flat:
+        ax.set_xlim(0, t_max)
+        ax.margins(y=0.10)
+    for ax in axes[-1, :]:
+        ax.set_xlabel("t [s]")
+    for ax in axes[:, 0]:
+        ax.set_ylabel("r [m]")
 
-    # Leyenda compartida fuera de los axes (debajo del título)
-    fig.legend(handles, labels, loc="upper center", ncol=5,
-               bbox_to_anchor=(0.5, 1.005), frameon=False,
-               handlelength=2.0, columnspacing=1.6)
+    fig.suptitle(r"Trayectoria r(t) — $\Delta t = 10^{-3}$ s",
+                 y=0.995, fontsize=14)
+    fig.tight_layout(rect=(0, 0, 1, 0.97))
 
-    out = FIGURES / "s1_r_vs_t.png"
+    out = FIGURES / "01_s1_r_vs_t.png"
     fig.savefig(out)
     print("→", out)
 

@@ -2,9 +2,9 @@ import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
-from _style import RESULTS, FIGURES, GRADIENT_CMAP
+from _style import RESULTS, FIGURES, GRADIENT_CMAP, plain_n_colorbar, plain_log_axis
 
 get_cmap = plt.get_cmap
 
@@ -42,7 +42,7 @@ def main():
 
     Ns = [parse_n(f.name) for f in files]
     cmap = get_cmap(GRADIENT_CMAP)
-    norm = LogNorm(vmin=min(Ns), vmax=max(Ns))
+    norm = Normalize(vmin=min(Ns), vmax=max(Ns))
 
     # =========== Figura 1: perfiles J^in(S) ===========
     fig, axes = plt.subplots(1, 2, figsize=(13.0, 5.0))
@@ -69,18 +69,19 @@ def main():
 
     axes[1].set_xlabel("S [m]")
     axes[1].set_ylabel(r"$J^{in}(S)$  [m$^{-1}$ s$^{-1}$]")
-    axes[1].set_title(r"Detalle  $S \in [1.5,\,5]$ m  (régimen del obstáculo)")
-    axes[1].set_xlim(1.5, 5.0)
+    axes[1].set_title(r"Detalle  $S \in [2,\,5]$ m  (régimen del obstáculo)")
+    axes[1].set_xlim(2.0, 5.0)
     axes[1].set_ylim(0, j_max_zoom * 1.06)
 
     sm = ScalarMappable(norm=norm, cmap=cmap); sm.set_array([])
     cbar = fig.colorbar(sm, ax=axes, fraction=0.030, pad=0.015)
     cbar.set_label("N")
+    plain_n_colorbar(cbar, Ns)
 
     fig.suptitle(r"Perfiles radiales — k=10$^3$ N/m, t $\geq$ t$_f$/2",
                  y=0.995, fontsize=14)
 
-    out = FIGURES / "s2_radial.png"
+    out = FIGURES / "07_s2_radial.png"
     fig.savefig(out)
     print("→", out)
 
@@ -93,8 +94,8 @@ def main():
     near = pd.DataFrame(rows).sort_values("N")
 
     fig2, ax = plt.subplots(figsize=(9.0, 5.4))
-    ax.set_xscale("log")
     ax.set_xlabel("N")
+    plain_log_axis(ax.xaxis, sorted(near["N"]))
 
     l1 = ax.plot(near["N"], near["j"], "o-", color="#1f77b4", lw=2.0, markersize=8,
                  label=r"$\langle J^{in} \rangle$  [m$^{-1}$ s$^{-1}$]")
@@ -117,7 +118,7 @@ def main():
     ax.legend(lines, labels, loc="upper left", frameon=True, framealpha=0.95,
               handlelength=2.2)
 
-    out2 = FIGURES / "s2_radial_near.png"
+    out2 = FIGURES / "08_s2_radial_near.png"
     fig2.savefig(out2)
     print("→", out2)
 

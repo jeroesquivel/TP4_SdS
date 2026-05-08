@@ -1,5 +1,6 @@
 package ar.edu.itba.sds.sistema2;
 
+import ar.edu.itba.sds.sistema2.core.Geometry;
 import ar.edu.itba.sds.sistema2.experiments.EnergyExperiment;
 import ar.edu.itba.sds.sistema2.experiments.JvsNExperiment;
 import ar.edu.itba.sds.sistema2.experiments.KSweepExperiment;
@@ -28,18 +29,18 @@ public final class Main2 {
                 EnergyExperiment.run(N, k, tfShort, baseSeed, integ, out);
             }
             case "timing" -> {
-                int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,400,800,1000"));
+                int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
                 TimingExperiment.run(Ns, k, tf, baseSeed, out);
             }
             case "jvsn" -> {
-                int[] Ns = parseInts(opts.getOrDefault("Ns", "10,20,50,100,200,400,800,1000"));
+                int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
                 double dt = Geometry.dtForK(k);
                 double dt2 = Double.parseDouble(opts.getOrDefault("dt2", "0.05"));
                 JvsNExperiment.runSweep(Ns, realizations, k, tf, dt, dt2, baseSeed, out);
             }
             case "ksweep" -> {
                 double[] ks = parseDoubles(opts.getOrDefault("ks", "100,1000,10000"));
-                int[] Ns = parseInts(opts.getOrDefault("Ns", "10,20,50,100,200,400,800,1000"));
+                int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
                 double dt2 = Double.parseDouble(opts.getOrDefault("dt2", "0.05"));
                 KSweepExperiment.run(ks, Ns, realizations, tf, dt2, baseSeed, out);
             }

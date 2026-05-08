@@ -1,5 +1,7 @@
-package ar.edu.itba.sds.sistema1;
+package ar.edu.itba.sds.sistema1.sim;
 
+import ar.edu.itba.sds.sistema1.core.Oscillator;
+import ar.edu.itba.sds.sistema1.core.Trajectory;
 import ar.edu.itba.sds.sistema1.integrators.Integrator;
 
 public final class Simulator {

@@ -2,9 +2,9 @@ import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
-from _style import RESULTS, FIGURES, GRADIENT_CMAP
+from _style import RESULTS, FIGURES, GRADIENT_CMAP, plain_n_colorbar
 
 get_cmap = plt.get_cmap
 
@@ -46,7 +46,7 @@ def main():
 
     Ns = sorted(by_n.keys())
     cmap = get_cmap(GRADIENT_CMAP)
-    norm = LogNorm(vmin=min(Ns), vmax=max(Ns))
+    norm = Normalize(vmin=min(Ns), vmax=max(Ns))
 
     fig, ax = plt.subplots(figsize=(9.4, 5.2))
     t_max = 0.0
@@ -73,8 +73,9 @@ def main():
     sm = ScalarMappable(norm=norm, cmap=cmap); sm.set_array([])
     cbar = fig.colorbar(sm, ax=ax, fraction=0.045, pad=0.015)
     cbar.set_label("N")
+    plain_n_colorbar(cbar, Ns)
 
-    out = FIGURES / "s2_cfc_t.png"
+    out = FIGURES / "05_s2_cfc_t.png"
     fig.savefig(out)
     print("→", out)
 

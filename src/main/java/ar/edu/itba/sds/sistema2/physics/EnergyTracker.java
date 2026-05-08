@@ -1,4 +1,6 @@
-package ar.edu.itba.sds.sistema2;
+package ar.edu.itba.sds.sistema2.physics;
+
+import ar.edu.itba.sds.sistema2.core.Particle;
 
 import java.util.List;
 

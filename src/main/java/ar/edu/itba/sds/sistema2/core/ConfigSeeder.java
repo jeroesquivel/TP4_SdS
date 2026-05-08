@@ -1,4 +1,4 @@
-package ar.edu.itba.sds.sistema2;
+package ar.edu.itba.sds.sistema2.core;
 
 import ar.edu.itba.sds.common.DeterministicRandom;
 

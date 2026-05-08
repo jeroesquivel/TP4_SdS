@@ -1,6 +1,6 @@
 package ar.edu.itba.sds.sistema1.integrators;
 
-import ar.edu.itba.sds.sistema1.Oscillator;
+import ar.edu.itba.sds.sistema1.core.Oscillator;
 
 public final class GearPC5Integrator implements Integrator {
     private static final double[] ALPHA = {3.0 / 16.0, 251.0 / 360.0, 1.0, 11.0 / 18.0, 1.0 / 6.0, 1.0 / 60.0};

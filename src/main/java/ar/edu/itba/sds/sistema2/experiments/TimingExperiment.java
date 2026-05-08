@@ -2,12 +2,12 @@ package ar.edu.itba.sds.sistema2.experiments;
 
 import ar.edu.itba.sds.common.DeterministicRandom;
 import ar.edu.itba.sds.common.Stopwatch;
-import ar.edu.itba.sds.sistema2.CellIndexMethod;
-import ar.edu.itba.sds.sistema2.ConfigSeeder;
-import ar.edu.itba.sds.sistema2.ForceModel;
-import ar.edu.itba.sds.sistema2.Geometry;
-import ar.edu.itba.sds.sistema2.Particle;
-import ar.edu.itba.sds.sistema2.Simulator2D;
+import ar.edu.itba.sds.sistema2.physics.CellIndexMethod;
+import ar.edu.itba.sds.sistema2.core.ConfigSeeder;
+import ar.edu.itba.sds.sistema2.physics.ForceModel;
+import ar.edu.itba.sds.sistema2.core.Geometry;
+import ar.edu.itba.sds.sistema2.core.Particle;
+import ar.edu.itba.sds.sistema2.sim.Simulator2D;
 import ar.edu.itba.sds.sistema2.integrators.VelocityVerletIntegrator2D;
 import ar.edu.itba.sds.sistema2.io.CsvWriter;
 

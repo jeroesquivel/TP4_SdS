@@ -1,4 +1,4 @@
-package ar.edu.itba.sds.sistema1;
+package ar.edu.itba.sds.sistema1.core;
 
 public final class Oscillator {
     public static final double M = 70.0;

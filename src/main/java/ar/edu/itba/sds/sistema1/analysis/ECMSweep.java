@@ -1,8 +1,8 @@
 package ar.edu.itba.sds.sistema1.analysis;
 
-import ar.edu.itba.sds.sistema1.Oscillator;
-import ar.edu.itba.sds.sistema1.Simulator;
-import ar.edu.itba.sds.sistema1.Trajectory;
+import ar.edu.itba.sds.sistema1.core.Oscillator;
+import ar.edu.itba.sds.sistema1.sim.Simulator;
+import ar.edu.itba.sds.sistema1.core.Trajectory;
 import ar.edu.itba.sds.sistema1.integrators.BeemanIntegrator;
 import ar.edu.itba.sds.sistema1.integrators.EulerIntegrator;
 import ar.edu.itba.sds.sistema1.integrators.GearPC5Integrator;

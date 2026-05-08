@@ -1,4 +1,4 @@
-package ar.edu.itba.sds.sistema2;
+package ar.edu.itba.sds.sistema2.core;
 
 public final class Particle {
     public static final byte FRESH = 0;
