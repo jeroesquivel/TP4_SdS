@@ -74,7 +74,7 @@ def main():
     ax.legend(loc="lower left", frameon=True, framealpha=0.95,
               handlelength=2.2)
 
-    out = FIGURES / "s1_ecm_vs_dt.png"
+    out = FIGURES / "02_s1_ecm_vs_dt.png"
     fig.savefig(out)
     print("→", out)
 

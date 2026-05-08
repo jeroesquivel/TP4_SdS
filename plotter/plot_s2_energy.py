@@ -129,6 +129,20 @@ def panel_ksweep_long(ax, files, cmap):
     return norm
 
 
+def _save_panel(panel_fn, files, cmap, out_path, cbar_label, ns_for_plain=None):
+    fig, ax = plt.subplots(figsize=(7.2, 4.8))
+    norm = panel_fn(ax, files, cmap)
+    if norm is not None:
+        sm = ScalarMappable(norm=norm, cmap=cmap); sm.set_array([])
+        cbar = fig.colorbar(sm, ax=ax, fraction=0.06, pad=0.02)
+        cbar.set_label(cbar_label)
+        if ns_for_plain is not None:
+            plain_n_colorbar(cbar, ns_for_plain)
+    fig.tight_layout()
+    fig.savefig(out_path)
+    print("→", out_path)
+
+
 def main(argv):
     s2 = RESULTS / "s2"
     files = list(s2.glob("energy_*.csv"))
@@ -137,36 +151,13 @@ def main(argv):
 
     cmap = get_cmap(GRADIENT_CMAP)
 
-    fig, axes = plt.subplots(1, 3, figsize=(16.5, 4.6))
-    norm_val = panel_validation(axes[0], files, cmap)
-    norm_jvn = panel_stability(axes[1], files, cmap)
-    norm_ksw = panel_ksweep_long(axes[2], files, cmap)
+    Ns_jvn = sorted({int(RE_JVN.search(f.name).group(1))
+                     for f in files
+                     if RE_JVN.search(f.name) and int(RE_JVN.search(f.name).group(2)) == 0})
 
-    # Una sola colorbar abajo (k) y otra (N) — para no saturar usamos texto
-    if norm_val is not None:
-        sm = ScalarMappable(norm=norm_val, cmap=cmap); sm.set_array([])
-        cbar = fig.colorbar(sm, ax=axes[0], fraction=0.06, pad=0.02)
-        cbar.set_label("k [N/m]")
-    if norm_jvn is not None:
-        sm = ScalarMappable(norm=norm_jvn, cmap=cmap); sm.set_array([])
-        cbar = fig.colorbar(sm, ax=axes[1], fraction=0.06, pad=0.02)
-        cbar.set_label("N")
-        Ns_jvn = sorted({int(RE_JVN.search(f.name).group(1))
-                         for f in files
-                         if RE_JVN.search(f.name) and int(RE_JVN.search(f.name).group(2)) == 0})
-        plain_n_colorbar(cbar, Ns_jvn)
-    if norm_ksw is not None:
-        sm = ScalarMappable(norm=norm_ksw, cmap=cmap); sm.set_array([])
-        cbar = fig.colorbar(sm, ax=axes[2], fraction=0.06, pad=0.02)
-        cbar.set_label("k [N/m]")
-
-    fig.suptitle(r"Conservación de energía total  —  $\Delta E_{tot}/E_0$",
-                 y=1.00, fontsize=14)
-
-    fig.subplots_adjust(wspace=0.36)
-    out = FIGURES / "03_s2_energy.png"
-    fig.savefig(out)
-    print("→", out)
+    _save_panel(panel_validation,   files, cmap, FIGURES / "03a_s2_energy_validation.png", "k [N/m]")
+    _save_panel(panel_stability,    files, cmap, FIGURES / "03b_s2_energy_jvsn.png",       "N", ns_for_plain=Ns_jvn)
+    _save_panel(panel_ksweep_long,  files, cmap, FIGURES / "03c_s2_energy_ksweep.png",     "k [N/m]")
 
 
 if __name__ == "__main__":
