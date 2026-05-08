@@ -54,3 +54,21 @@ dkms.conf
 # debug information files
 *.dwo
 /.idea/
+
+# Java/Maven
+target/
+*.class
+*.iml
+
+# Project outputs
+results/
+figures/
+
+# Python
+plotter/__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store

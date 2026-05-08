@@ -38,11 +38,12 @@ Fuentes primarias de la consigna y la teoría:
 |---|---|
 | Lenguaje simulación | **Java 24** + Maven. Sin dependencias externas. |
 | Lenguaje plotter | Python (numpy + matplotlib + pandas). No es entregable. |
-| Gear-5 α₀ con f dependiente de v | **3/16** (verificado contra Teórica 4 slide 29; el wiki tiene los rótulos invertidos en `metodos/gear_predictor_corrector.md`). |
+| Gear-5 α₀ con f dependiente de v | **3/16** (verificado contra Teórica 4 slide 29 y `wiki/metodos/gear_predictor_corrector.md`). |
 | Realizaciones Sistema 2 | M = 10 por (N, k). |
-| Integradores Sistema 2 | Beeman (default) + Verlet original (validación cruzada). |
-| Verlet original con f(x,v) | `v` lageada: usar la `v` centrada del paso anterior; `v(0) = v₀` para el primer paso. |
-| ECM Sistema 1 | Reportar `MSE = (1/N)·Σe²` y `RMSE = √MSE`. Plot principal usa **RMSE** (pendiente log-log = orden global del método). |
+| Integradores Sistema 2 | **Velocity-Verlet 2D** (default; symplectic, F(x) sin v-dep — recomendado por wiki) + Beeman 2D (validación cruzada). |
+| Verlet original Sistema 1 con f(x,v) | `v` lageada: usar la `v` centrada del paso anterior; `v(0) = v₀` para el primer paso. Documentar en el slide que Verlet original asume f(x); la variante v-lageada degrada parcialmente el orden. |
+| Variante Euler Sistema 1 | **Euler PC Modified** (Teórica slide 23 + slide 37 muestra esa curva). Alternativa aceptable: Euler modificado (slide 10). Aclarar cuál se usa en el slide. |
+| ECM Sistema 1 | Reportar **ECM = (1/N)·Σe²** (notación de la consigna y la teórica slide 36). Plot principal: **ECM vs Δt en log-log** (pendiente = 2×orden del método). RMSE = √ECM se guarda en el CSV como referencia interna. |
 | Cell index method (CIM) | Lado de celda = 2·r_max = 2 m; para N ≤ 1000 baja O(N²) → O(N). |
 | Δt₂ (sampling) para perfiles | 0.05 s (50× el dt típico). Cfc se guarda con resolución dt completa. |
 | Reproducibilidad | Semilla por realización: `seed = baseSeed + 1000·N + realizationIdx`. |
@@ -74,7 +75,7 @@ TP4_SDS/
 │   │   ├── ForceModel.java                # pares + obstáculo + borde
 │   │   ├── EnergyTracker.java
 │   │   ├── Simulator2D.java
-│   │   ├── integrators/{Integrator2D, BeemanIntegrator2D, VerletIntegrator2D}.java
+│   │   ├── integrators/{Integrator2D, VelocityVerletIntegrator2D, BeemanIntegrator2D}.java
 │   │   ├── observables/{CfcTracker, RadialProfileAccumulator, FirstBorderTracker}.java
 │   │   ├── experiments/{TimingExperiment, JvsNExperiment, KSweepExperiment}.java
 │   │   ├── io/CsvWriter.java
@@ -124,12 +125,19 @@ Constructor `(Oscillator sys, double r0, double v0, double dt)`. Cada implementa
 
 ### Pseudocódigo de los 4 integradores
 
-**Euler modificado** (Teórica slide 10):
+**Euler PC Modified** (Teórica slide 23; es la curva del slide 37). Predictor → evaluar → corrector:
 ```
-a   = (−k·r − γ·v) / m
-v  ← v + dt·a
-r  ← r + dt·v             (usa v ya actualizada)
+# Predictor
+vPred = v + dt·a(r, v)
+rPred = r + dt·v
+# Evaluar con predichos
+aNew  = (−k·rPred − γ·vPred) / m
+# Corrector (usa aNew y v corregida para r)
+vNew  = v + dt·aNew
+rNew  = r + dt·vNew
+r, v  = rNew, vNew
 ```
+Variante alternativa (Euler modificado, slide 10): `v ← v + dt·a; r ← r + dt·v` (usa v ya actualizada). Aclarar en el slide cuál se usa.
 
 **Verlet original** (Teórica slide 13). Init: `rPrev = r₀ − dt·v₀ + dt²·a(0)/2`; `vLag = v₀`.
 ```
@@ -151,7 +159,7 @@ loop:
   aPrev, a, v, r = a, aNext, vCorr, rNext
 ```
 
-**Gear PC orden 5 con v-dep** (Teórica slides 24–30, slide 29 para los α). Estado en derivadas escaladas `R_k = r^(k)·dt^k / k!`, k = 0..5. Coeficientes **(3/16, 251/360, 1, 11/18, 1/6, 1/60)** — α₀ = 3/16 para `r₂ = f(r, r₁)` (caso v-dep). Nota: el wiki de Obsidian tiene los rótulos cruzados; la fuente autoritaria es slide 29.
+**Gear PC orden 5 con v-dep** (Teórica slides 24–30, slide 29 para los α). Estado en derivadas escaladas `R_k = r^(k)·dt^k / k!`, k = 0..5. Coeficientes **(3/16, 251/360, 1, 11/18, 1/6, 1/60)** — α₀ = 3/16 para `r₂ = f(r, r₁)` (caso v-dep). Confirmado contra Teórica slide 29 y `wiki/metodos/gear_predictor_corrector.md` (que distingue correctamente α₀ = 3/20 para F(r) y α₀ = 3/16 para F(r,v)).
 
 Init analítico (de la EDO `r̈ = (−k·r − γ·v)/m`):
 ```
@@ -189,17 +197,18 @@ Salida: `r = R0`, `v = R1/dt`.
 
 ### Análisis (`ECMSweep`)
 - dt ∈ {10⁻², 10⁻³, 10⁻⁴, 10⁻⁵, 10⁻⁶}. Para cada (integrador, dt), correr `Simulator.run` y comparar con `Oscillator.analytical(t)`.
-- Producir `results/s1/ecm_sweep.csv` (`integrator, dt, mse, rmse, n_steps`).
+- ECM definido como en consigna y teórica slide 36: `ECM = (1/N_pasos) · Σ (r_num(tₙ) − r_ana(tₙ))²`.
+- Producir `results/s1/ecm_sweep.csv` (`integrator, dt, ecm, rmse, n_steps`); RMSE = √ECM se conserva como referencia interna.
 - Producir `results/s1/trajectory_<integrator>_dt1e-3.csv` (`t, r_num, r_ana`) sólo para el plot de superposición.
 
 ### Validación interna
 1. A dt = 10⁻³ las 4 trayectorias se superponen visualmente con la analítica. Si Euler diverge a dt = 10⁻³, hay bug (ω·dt ≈ 0.012, muy estable).
-2. Pendiente log-log de **RMSE** vs dt: Euler ≈ 1, Verlet ≈ 2, Beeman ≈ 2, Gear-5 ≈ 4–5. Equivalente para MSE: el doble.
-3. Gear-5 < resto en RMSE en todo el rango, salvo posible piso de redondeo a dt = 10⁻⁶.
+2. Pendiente log-log de **ECM** vs dt (per `wiki/conceptos/integradores.md` y Teórica slide 37): Euler ≈ 2, Verlet ≈ 4, Beeman ≈ 4, Gear-5 ≈ 10. (En RMSE: la mitad — 1, 2, 2, 5).
+3. Gear-5 < resto en ECM en todo el rango, salvo posible piso de redondeo (~10⁻³⁰ en ECM, ~10⁻¹⁵ en RMSE) a dt = 10⁻⁶.
 
 ### Slides Sistema 1 (~2 slides, < 1 min)
 - (a) `r(t)` numérico (4 colores) + analítica con dt = 10⁻³.
-- (b) log-log RMSE vs dt; 4 curvas con pendientes anotadas.
+- (b) log-log **ECM** vs dt; 4 curvas con pendientes anotadas (~2 / 4 / 4 / 10).
 
 ## Sistema 2 — recinto circular con obstáculo
 
@@ -229,20 +238,20 @@ Cuadrícula sobre el bounding-box del recinto (lado L = 80 m). Lado de celda = 2
 - `EnergyTracker` exporta `t, E_kin, E_pot, E_total` por realización. E_pot = Σ_pares ½·k·ξ² (pares en contacto + contactos con obstáculo + contactos con borde, todos con la misma forma).
 - Validación gating: si la deriva relativa de E_total en una corrida de prueba (N = 100, k = 10³, t_f = 5 s) supera 1%, bajar dt antes de lanzar barridos.
 
-### Integradores 2D (`BeemanIntegrator2D`, `VerletIntegrator2D`)
-- Default: Beeman 2D (componente a componente, `aPrev` por partícula).
-- Validación cruzada: Verlet original 2D en N = 200, k = 10³, M = 3 — confirmar que ⟨J⟩ es compatible (sirve internamente, no necesariamente para el slide).
-- Beeman es preferible cuando dt se acerca a τ_col (k = 10⁵).
+### Integradores 2D (`VelocityVerletIntegrator2D`, `BeemanIntegrator2D`)
+- **Default: Velocity-Verlet 2D** (Teórica slide 17; recomendado por `wiki/conceptos/integradores.md` y `wiki/metodos/velocity_verlet.md` para el Sistema 2: F = −k·ξ·ê depende sólo de posiciones ⇒ symplectic, conserva E a largo plazo, simple).
+- Validación cruzada: Beeman 2D en N = 200, k = 10³, M = 3 — confirmar que ⟨J⟩ es compatible (sirve internamente, no necesariamente para el slide). Beeman es preferible si dt se acerca a τ_col (k = 10⁵).
+- Verlet original 2D no se usa: requiere `x(t−dt)` y la velocidad queda lageada — incómodo para E_kin y para el filtro `x·v < 0` de los perfiles radiales.
 
 ### Item 1.1 — Tiempo de ejecución vs N
-- N ∈ {50, 100, 200, 400, 800, 1000}.
-- t_f reducido para escalado puro (50 s; el escalado no necesita 500 s).
-- Una sola realización por N (lo que se mide es escalado, no media).
+- N ∈ {100, 200, 400, 800, 1000} (rango de la consigna; opcionalmente {50} para escalado).
+- **t_f = 500 s** (lo pide explícitamente la consigna y el TP3 usó 500 s; la comparación TP3↔TP4 sólo es válida con el mismo t_f).
+- Una sola realización por N: lo que se mide es el tiempo de máquina, no estadística sobre realizaciones.
 - CSV: `results/s2/timing.csv` (N, t_exec_s).
-- Plot **log-log** y comparación con datos de TP3 (ver §Dependencias externas).
+- Plot **log-log** con TP3 superpuesto (ver §Dependencias externas). Identificar pendiente en log-log para afirmar ley de potencia (no decir "exponencial" — corrección recurrente del TP3).
 
 ### Item 1.2 — Cfc(t) y J(N)
-- N ∈ {10, 20, 50, 100, 200, 400, 800}, M = 10.
+- N ∈ {10, 20, 50, 100, 200, 400, 800, 1000}, M = 10. (Cota superior N=1000 = límite explícito de la consigna.)
 - `CfcTracker` por partícula:
   ```
   if ξ_obs > 0:
@@ -276,7 +285,7 @@ Cuadrícula sobre el bounding-box del recinto (lado L = 80 m). Lado de celda = 2
 
 ### Item 1.4 — Variación de k
 - k ∈ {10², 10³, 10⁴} obligatorios; 10⁵ si la máquina banca. Validar dt para cada k (ver tabla).
-- Para cada (k, N) ∈ {10², 10³, 10⁴} × {10, 20, 50, 100, 200, 400, 800}: M = 10 realizaciones.
+- Para cada (k, N) ∈ {10², 10³, 10⁴} × {10, 20, 50, 100, 200, 400, 800, 1000}: M = 10 realizaciones.
 - Output: `results/s2/k_sweep.csv` (`k, N, J_mean, J_std, J_in_S2_mean, J_in_S2_std`).
 - Plot: 2 paneles (uno por observable). Eje x = N, una curva por k con colorbar.
 - Escalar característico vs k: `max_N⟨J⟩(N, k)` y `argmax_N⟨J⟩(N, k) =: N*(k)`. Plot de cada uno vs k en log-log.
@@ -342,7 +351,7 @@ Sólo lo universal y aplicable a TP4. No es lista de errores pasados.
 5. **Item 1.1** (timing) — barato.
 6. **Item 1.2 + 1.3** sobre las mismas corridas (M = 10).
 7. **Item 1.4** con k ∈ {10², 10³, 10⁴}; 10⁵ sólo si hay tiempo.
-8. **Verlet 2D** y validación cruzada en N = 200, k = 10³, M = 3.
+8. **Beeman 2D** y validación cruzada contra Velocity-Verlet en N = 200, k = 10³, M = 3.
 9. **Plotter** y **slides** en paralelo desde el paso 1.
 10. **Item 1.5** opcional al final.
 
@@ -370,7 +379,7 @@ Sólo lo universal y aplicable a TP4. No es lista de errores pasados.
 
 ## Verificación end-to-end
 
-1. Sistema 1: `mvn compile && mvn exec:java -Dexec.mainClass=...sistema1.Main1`. Inspeccionar `results/s1/`. Correr `python plotter/plot_s1_*.py`. Verificar (a) las 4 trayectorias se superponen a dt = 10⁻³, (b) pendientes 1, 2, 2, 4–5 en log-log de RMSE.
+1. Sistema 1: `mvn compile && mvn exec:java -Dexec.mainClass=...sistema1.Main1`. Inspeccionar `results/s1/`. Correr `python plotter/plot_s1_*.py`. Verificar (a) las 4 trayectorias se superponen a dt = 10⁻³, (b) pendientes ~2 / 4 / 4 / 10 en log-log de **ECM** (Euler / Verlet / Beeman / Gear-5).
 2. Sistema 2 sanity: `--experiment energy --N 100 --k 1000 --tf 5`. Plot de E(t) constante salvo fluctuación. Si deriva > 1%, bajar dt.
 3. Timing: `--experiment timing`. Plot log-log con pendiente esperada (lineal en log-log si CIM funciona).
 4. J(N): `--experiment jvsn`. Cfc(t) lineal en régimen estacionario; ⟨J⟩(N) reproduce orden y forma de la curva del TP3.
@@ -386,14 +395,14 @@ Sólo lo universal y aplicable a TP4. No es lista de errores pasados.
 - `src/main/java/ar/edu/itba/sds/sistema1/integrators/{Integrator, EulerIntegrator, VerletIntegrator, BeemanIntegrator, GearPC5Integrator}.java`
 - `src/main/java/ar/edu/itba/sds/sistema1/analysis/ECMSweep.java`
 - `src/main/java/ar/edu/itba/sds/sistema2/{Vec2, Particle, Geometry, ConfigSeeder, CellIndexMethod, ForceModel, EnergyTracker, Simulator2D, Main2}.java`
-- `src/main/java/ar/edu/itba/sds/sistema2/integrators/{Integrator2D, BeemanIntegrator2D, VerletIntegrator2D}.java`
+- `src/main/java/ar/edu/itba/sds/sistema2/integrators/{Integrator2D, VelocityVerletIntegrator2D, BeemanIntegrator2D}.java`
 - `src/main/java/ar/edu/itba/sds/sistema2/observables/{CfcTracker, RadialProfileAccumulator, FirstBorderTracker}.java`
 - `src/main/java/ar/edu/itba/sds/sistema2/experiments/{TimingExperiment, JvsNExperiment, KSweepExperiment}.java`
 - `src/main/java/ar/edu/itba/sds/sistema2/io/CsvWriter.java`
 - `src/main/java/ar/edu/itba/sds/common/{DeterministicRandom, Stopwatch}.java`
 - `plotter/{requirements.txt, _style.py, plot_s1_r_vs_t.py, plot_s1_ecm_vs_dt.py, plot_s2_energy.py, plot_s2_timing.py, plot_s2_cfc_t.py, plot_s2_j_vs_n.py, plot_s2_radial.py, plot_s2_k_sweep.py}`
 - Actualizar `.gitignore`: `target/`, `results/`, `figures/`, `plotter/__pycache__/`, `.DS_Store`.
-- `CLAUDE.md` §2.3 ya tenía α₀ = 3/16 para v-dep — confirmado. Sin cambios necesarios. (El wiki de Obsidian, en cambio, tiene los rótulos invertidos y debería corregirse fuera de este repo.)
+- `CLAUDE.md` §2.3 tiene α₀ = 3/16 para v-dep — confirmado contra Teórica slide 29 y `wiki/metodos/gear_predictor_corrector.md` (que ya distingue correctamente α₀ = 3/20 para F(r) y α₀ = 3/16 para F(r,v)). Sin cambios necesarios.
 
 ## Open questions (no bloqueantes)
 

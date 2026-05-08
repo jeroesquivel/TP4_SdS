@@ -95,11 +95,16 @@ r₅(0) = (−k·r₃(0) − γ·r₄(0)) / m
 ECM = (1 / N_pasos) · Σ_n  (r_num(t_n) − r_ana(t_n))²
 ```
 
-Probar `Δt ∈ {10⁻², 10⁻³, 10⁻⁴, 10⁻⁵, 10⁻⁶} s`. Pendientes esperadas en log-log:
-- Euler ≈ 1
-- Verlet ≈ 2
-- Beeman ≈ 2 (3 si la fuerza fuera independiente de v)
-- Gear-5 ≈ 4–5
+Probar `Δt ∈ {10⁻², 10⁻³, 10⁻⁴, 10⁻⁵, 10⁻⁶} s`. Pendientes esperadas en log-log **del ECM** (recordar: `ECM ~ Δt^(2·orden)`; RMSE = √ECM tiene la mitad del slope):
+
+| Integrador | slope ECM teórico | slope ECM empírico (CSV) | nota |
+|---|---|---|---|
+| Euler PC | 2 | 2.0 | orden 1 ✅ |
+| Verlet original | 4 | **2.0** | la `v` lageada para evaluar `f(r,v)` baja el orden efectivo a 1 — aclarar en el slide |
+| Beeman PC | 4 | 4.0 | orden 2 con predicción de `v` ✅ |
+| Gear-5 (α₀ = 3/16) | 10 | 10 hasta el piso numérico (~10⁻²² a Δt = 10⁻³) | el CSV muestra el floor para Δt < 10⁻³ |
+
+**El slide grafica ECM** (lo pide la consigna y la teórica slide 36). Las pendientes a anotar son las de la columna empírica.
 
 ### 2.5 Slides a entregar (~2 slides)
 
