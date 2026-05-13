@@ -51,8 +51,8 @@
 
 \newcommand{\framecite}[1]{%
   \begin{tikzpicture}[remember picture,overlay]
-    \node[anchor=south east,font=\tiny,text=black!60]
-      at ([xshift=-6pt,yshift=4pt]current page.south east) {#1};
+    \node[anchor=south west,font=\tiny,text=black!60]
+      at ([xshift=6pt,yshift=4pt]current page.south west) {#1};
   \end{tikzpicture}}
 
 \title[TP4 -- DM paso temporal]{Dinámica Molecular regida por el paso temporal}
@@ -101,7 +101,6 @@
             \end{itemize}
         \end{column}
     \end{columns}
-    \framecite{Teórica 4, slide 36}
 \end{frame}
 
 \begin{frame}{Error cuadrático medio vs.\ $\Delta t$}
@@ -111,11 +110,12 @@
             \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/02_s1_ecm_vs_dt.png}
         \end{column}
         \begin{column}{0.32\textwidth}
-            \textbf{ECM}
-            \[
-                \mathrm{ECM} = \frac{1}{N_{\text{pasos}}}\sum_n (r_{\text{num}}(t_n) - r_{\text{ana}}(t_n))^2
-            \]
-            \vspace{0.05cm}
+            \textbf{ECM}\\[2pt]
+            \resizebox{\linewidth}{!}{%
+              $\mathrm{ECM} = \dfrac{1}{N_{\text{pasos}}}\sum_n\bigl(r^{\text{num}}_n - r^{\text{ana}}_n\bigr)^2$%
+            }
+            \vspace{0.15cm}
+
             \textbf{Pendientes (log-log)}
             \begin{itemize}\setlength\itemsep{1pt}
                 \item Euler PC: $\approx 2$
@@ -127,11 +127,10 @@
             \textbf{Conclusión}
             \begin{itemize}\setlength\itemsep{1pt}
                 \item Gear-5 minimiza el ECM con mayor orden.
-                \item Piso numérico de Gear-5 alcanzado para $\Delta t \lesssim \SI{e-3}{s}$.
+                \item Piso numérico para $\Delta t \lesssim \SI{e-3}{s}$.
             \end{itemize}
         \end{column}
     \end{columns}
-    \framecite{Gear (1966); Teórica 4, slide 29}
 \end{frame}
 
 % =============================================================================
@@ -257,7 +256,7 @@
 % =============================================================================
 % ANIMACIONES (entregable: frame + link)
 % =============================================================================
-\begin{frame}{Animación -- $N = 100$, $k = 10^{3}$}
+\begin{frame}{Animación I}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -269,13 +268,12 @@
                 \item $N = 100$
                 \item $k = 10^{3}$ \si{N/m}
                 \item $\Delta t = \SI{e-3}{s}$
-                \item 25 fps, 6 s
             \end{itemize}
         \end{column}
     \end{columns}
 \end{frame}
 
-\begin{frame}{Animación -- $N = 1000$, $k = 10^{3}$}
+\begin{frame}{Animación II}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -287,7 +285,6 @@
                 \item $N = 1000$
                 \item $k = 10^{3}$ \si{N/m}
                 \item $\Delta t = \SI{e-3}{s}$
-                \item 25 fps, 6 s
             \end{itemize}
         \end{column}
     \end{columns}
@@ -297,6 +294,11 @@
 % RESULTADOS
 % =============================================================================
 \section{Resultados}
+
+\begin{frame}[plain,c]
+    \centering
+    {\usebeamercolor[fg]{structure}\fontsize{48}{56}\selectfont Resultados\par}
+\end{frame}
 
 \begin{frame}{Validación de $\Delta t$ -- evolución de $E_{\text{total}}(t)$}
     \begin{columns}[T]
@@ -422,6 +424,11 @@
 % CONCLUSIONES
 % =============================================================================
 \section{Conclusiones}
+
+\begin{frame}[plain,c]
+    \centering
+    {\usebeamercolor[fg]{structure}\fontsize{48}{56}\selectfont Conclusiones\par}
+\end{frame}
 
 \begin{frame}{Conclusiones}
     \begin{itemize}\setlength\itemsep{4pt}
