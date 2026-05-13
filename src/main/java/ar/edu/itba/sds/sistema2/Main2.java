@@ -6,7 +6,9 @@ import ar.edu.itba.sds.sistema2.experiments.EnergyExperiment;
 import ar.edu.itba.sds.sistema2.experiments.JvsNExperiment;
 import ar.edu.itba.sds.sistema2.experiments.KSweepExperiment;
 import ar.edu.itba.sds.sistema2.experiments.TimingExperiment;
+import ar.edu.itba.sds.sistema2.viz.FrameExporter;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -65,6 +67,16 @@ public final class Main2 {
                 double dt2 = Double.parseDouble(opts.getOrDefault("dt2", "0.05"));
                 JvsNExperiment.runSweep(Ns, realizations, k, tf, dt, dt2, baseSeed, out);
             }
+            case "animate" -> {
+                int N = Integer.parseInt(opts.getOrDefault("N", "100"));
+                double tfAnim = Double.parseDouble(opts.getOrDefault("tf", "6"));
+                int fps = Integer.parseInt(opts.getOrDefault("fps", "25"));
+                int width = Integer.parseInt(opts.getOrDefault("width", "480"));
+                String integ = opts.getOrDefault("integrator", "velocity_verlet");
+                String outDir = opts.getOrDefault("out",
+                        "latex/figures/anim_N" + N + "_k" + (long) k);
+                FrameExporter.render(N, k, tfAnim, fps, width, integ, baseSeed, new File(outDir));
+            }
             case "ksweep" -> {
                 double[] ks = parseDoubles(opts.getOrDefault("ks", "100,1000,10000"));
                 int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
@@ -73,7 +85,7 @@ public final class Main2 {
             }
             default -> {
                 System.err.println("Unknown experiment: " + experiment);
-                System.err.println("Available: energy, energy_dt_scan, timing, jvsn, ksweep");
+                System.err.println("Available: energy, energy_dt_scan, timing, jvsn, ksweep, animate");
                 System.exit(1);
             }
         }

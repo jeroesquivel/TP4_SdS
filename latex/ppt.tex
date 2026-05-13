@@ -36,21 +36,23 @@
 \usepackage{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+% Animaciones embebidas como mp4 (paquete multimedia, macro \movie).
+% Los mp4 se generan automáticamente con `scripts/render_animations.sh`
+% (Java → PNG → ffmpeg → H.264). Funciona con Adobe Acrobat (Reader/Pro)
+% y con pympress. El poster (frame estático) se ve en cualquier visor.
 \usepackage{multimedia}
 
-% Video con ratio calculado dinámicamente desde \textheight
-% Asume frames 1262x922 px (mismo formato que TP3)
-\newlength{\vidH}
+% \simvideo{poster sin ext}{video sin ext}
+%   poster: figures/N=100   (.png)
+%   video:  videos/N=100    (.mp4)
 \newlength{\vidW}
-\newcommand{\simvideo}[2]{%   #1=etiqueta  #2=archivo (sin .mp4) en videos/
+\newlength{\vidH}
+\newcommand{\simvideo}[2]{%
   \setlength{\vidH}{0.62\textheight}%
-  \pgfmathsetlength{\vidW}{\vidH * (1262/922)}%
-  \movie[autostart,loop,width=\vidW,height=\vidH]{%
-    \parbox[c][\vidH][c]{\vidW}{\centering
-      {\large$\blacktriangleright$ #1}\\[4pt]
-      {\small\texttt{videos/#2.mp4}}%
-    }%
-  }{videos/#2.mp4}%
+  \setlength{\vidW}{\vidH}% animaciones cuadradas (480x480)
+  \movie[autostart,loop,width=\vidW,height=\vidH,poster]{%
+    \includegraphics[width=\vidW,height=\vidH]{#1.png}%
+  }{#2.mp4}%
 }
 
 % Vectores: negrita sin itálica
@@ -278,14 +280,15 @@
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
-            \simvideo{$N=100$}{N=100}
+            \simvideo{figures/N=100}{videos/N=100}
         \end{column}
         \begin{column}{0.32\textwidth}
             \textbf{Condiciones}
             \begin{itemize}
                 \item $N = 100$
                 \item $k = 10^{3}$ \si{N/m}
-                \item $\Delta t = \SI{2e-3}{s}$
+                \item $\Delta t = \SI{e-3}{s}$
+                \item 25 fps, 6 s
             \end{itemize}
         \end{column}
     \end{columns}
@@ -295,14 +298,15 @@
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
-            \simvideo{$N=1000$}{N=1000}
+            \simvideo{figures/N=1000}{videos/N=1000}
         \end{column}
         \begin{column}{0.32\textwidth}
             \textbf{Condiciones}
             \begin{itemize}
                 \item $N = 1000$
                 \item $k = 10^{3}$ \si{N/m}
-                \item $\Delta t = \SI{2e-3}{s}$
+                \item $\Delta t = \SI{e-3}{s}$
+                \item 25 fps, 6 s
             \end{itemize}
         \end{column}
     \end{columns}
