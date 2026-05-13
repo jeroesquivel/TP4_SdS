@@ -1,6 +1,7 @@
 package ar.edu.itba.sds.sistema2;
 
 import ar.edu.itba.sds.sistema2.core.Geometry;
+import ar.edu.itba.sds.sistema2.experiments.EnergyDtScanExperiment;
 import ar.edu.itba.sds.sistema2.experiments.EnergyExperiment;
 import ar.edu.itba.sds.sistema2.experiments.JvsNExperiment;
 import ar.edu.itba.sds.sistema2.experiments.KSweepExperiment;
@@ -9,10 +10,12 @@ import ar.edu.itba.sds.sistema2.experiments.TimingExperiment;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public final class Main2 {
     public static void main(String[] args) throws IOException {
+        Locale.setDefault(Locale.US);
         Map<String, String> opts = parseArgs(args);
         String experiment = opts.getOrDefault("experiment", "energy");
         long baseSeed = Long.parseLong(opts.getOrDefault("seed", "42"));
@@ -27,6 +30,30 @@ public final class Main2 {
                 double tfShort = Double.parseDouble(opts.getOrDefault("tf", "5"));
                 String integ = opts.getOrDefault("integrator", "velocity_verlet");
                 EnergyExperiment.run(N, k, tfShort, baseSeed, integ, out);
+            }
+            case "energy_dt_scan" -> {
+                int N = Integer.parseInt(opts.getOrDefault("N", "800"));
+                double tfScan = Double.parseDouble(opts.getOrDefault("tf", "2000"));
+                String integ = opts.getOrDefault("integrator", "velocity_verlet");
+                if (opts.containsKey("dts") || opts.containsKey("ks")) {
+                    double[] ks = parseDoubles(opts.getOrDefault("ks", "100,1000,10000"));
+                    double[] dts = parseDoubles(opts.getOrDefault("dts",
+                            "1e-4,5e-4,1e-3,5e-3,1e-2"));
+                    EnergyDtScanExperiment.runSweep(N, ks, dts, tfScan, baseSeed, integ, out);
+                } else {
+                    double[][] ksDts = {
+                            {100.0,   5e-3, 1e-2, 5e-2},
+                            {1000.0,  5e-4, 3e-3, 5e-3, 1e-2},
+                            {10000.0, 5e-4, 1e-3, 5e-3},
+                    };
+                    for (double[] row : ksDts) {
+                        double kVal = row[0];
+                        for (int i = 1; i < row.length; i++) {
+                            EnergyDtScanExperiment.runOne(N, kVal, row[i], tfScan,
+                                    baseSeed, integ, out);
+                        }
+                    }
+                }
             }
             case "timing" -> {
                 int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
@@ -46,7 +73,7 @@ public final class Main2 {
             }
             default -> {
                 System.err.println("Unknown experiment: " + experiment);
-                System.err.println("Available: energy, timing, jvsn, ksweep");
+                System.err.println("Available: energy, energy_dt_scan, timing, jvsn, ksweep");
                 System.exit(1);
             }
         }

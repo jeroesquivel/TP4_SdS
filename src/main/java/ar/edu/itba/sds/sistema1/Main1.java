@@ -4,9 +4,11 @@ import ar.edu.itba.sds.sistema1.analysis.ECMSweep;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Locale;
 
 public final class Main1 {
     public static void main(String[] args) throws IOException {
+        Locale.setDefault(Locale.US);
         Path out = Path.of("results", "s1");
         System.out.println("[S1] Computing ECM sweep over dt ∈ {1e-2, ..., 1e-6}");
         ECMSweep.writeSweep(out);
