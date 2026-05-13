@@ -55,7 +55,7 @@ public final class AnimationViewer extends JFrame {
 
     public AnimationViewer() {
         super("TP4 — Sistema 2 (recinto circular con obstáculo)");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         kCombo.setSelectedItem("1e3");
 

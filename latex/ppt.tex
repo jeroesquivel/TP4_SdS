@@ -1,0 +1,465 @@
+% =============================================================================
+%  SIMULACIÓN DE SISTEMAS - TP4
+%  Grupo 05 - Sebastián Caules, Jerónimo Esquivel, Andrés Cortese
+%  Dinámica Molecular regida por el paso temporal
+%  Sistema 1: oscilador amortiguado
+%  Sistema 2: recinto circular con obstáculo fijo
+%
+%  Versión ORAL (animaciones embebidas con \movie del paquete multimedia).
+%  Compilar y proyectar con pympress para autoplay.
+% =============================================================================
+
+\documentclass[10pt,aspectratio=169]{beamer}
+\usetheme{Warsaw}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+
+% Header: miniframes con puntos de progreso por sección, sin subsection
+\useoutertheme[subsection=false,footline=empty]{miniframes}
+
+% Footer: solo número de diapositiva a la derecha
+\setbeamertemplate{footline}{%
+    \hfill{\footnotesize\insertframenumber\,/\,\inserttotalframenumber}\hspace{8pt}\vspace{4pt}%
+}
+
+% Colores consistentes
+\setbeamercolor{frametitle}{bg=blue!70!black, fg=white}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\usepackage{multimedia}
+
+% Video con ratio calculado dinámicamente desde \textheight
+% Asume frames 1262x922 px (mismo formato que TP3)
+\newlength{\vidH}
+\newlength{\vidW}
+\newcommand{\simvideo}[2]{%   #1=etiqueta  #2=archivo (sin .mp4) en videos/
+  \setlength{\vidH}{0.62\textheight}%
+  \pgfmathsetlength{\vidW}{\vidH * (1262/922)}%
+  \movie[autostart,loop,width=\vidW,height=\vidH]{%
+    \parbox[c][\vidH][c]{\vidW}{\centering
+      {\large$\blacktriangleright$ #1}\\[4pt]
+      {\small\texttt{videos/#2.mp4}}%
+    }%
+  }{videos/#2.mp4}%
+}
+
+% Vectores: negrita sin itálica
+\newcommand{\vect}[1]{\mathbf{#1}}
+
+% Cita en esquina del frame (no diapositiva final de bibliografía)
+\newcommand{\framecite}[1]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=south east,font=\tiny,text=black!60]
+      at ([xshift=-6pt,yshift=4pt]current page.south east) {#1};
+  \end{tikzpicture}}
+
+% --- Metadatos ---
+\title[TP4 -- DM paso temporal]{Dinámica Molecular regida por el paso temporal}
+\subtitle{Trabajo Práctico N\textsuperscript{o} 4}
+\author[Caules, Esquivel, Cortese]{Sebastián Caules \and Jerónimo Esquivel \and Andrés Cortese}
+\institute[ITBA]{Instituto Tecnológico de Buenos Aires \\ 72.25 -- Simulación de Sistemas -- Grupo 05}
+\date{18 de mayo de 2026}
+
+\begin{document}
+
+% =============================================================================
+% PORTADA
+% =============================================================================
+{
+    \setbeamertemplate{headline}{}
+    \setbeamertemplate{footline}{}
+    \begin{frame}[plain]
+        \titlepage
+    \end{frame}
+}
+
+% =============================================================================
+% SISTEMA 1 -- solo resultados, ~2 slides, < 1 min, ANTES de Sistema 2
+% (consigna: sin introducción / sin integradores / sin animaciones / sin conclusiones)
+% =============================================================================
+\section{Sistema 1}
+
+\begin{frame}{Trayectorias $r(t)$ -- numérica vs.\ analítica}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/01_s1_r_vs_t.png}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Parámetros}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item $m = \SI{70}{kg}$
+                \item $k = \SI{e4}{N/m}$
+                \item $\gamma = \SI{100}{kg/s}$
+                \item $r(0) = \SI{1}{m}$
+                \item $v(0) = -\tfrac{A\gamma}{2m}$
+                \item $\Delta t = \SI{e-3}{s}$
+                \item $t_f = \SI{5}{s}$
+            \end{itemize}
+            \vspace{0.2cm}
+            \textbf{Observación}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item Gear-5 y Beeman PC superponen la analítica.
+                \item Euler PC y Verlet visibles a $\Delta t = \SI{e-3}{s}$.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \framecite{Teórica 4, slide 36}
+\end{frame}
+
+\begin{frame}{Error cuadrático medio vs.\ $\Delta t$}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/02_s1_ecm_vs_dt.png}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{ECM}
+            \[
+                \mathrm{ECM} = \frac{1}{N_{\text{pasos}}}\sum_n (r_{\text{num}}(t_n) - r_{\text{ana}}(t_n))^2
+            \]
+            \vspace{0.05cm}
+            \textbf{Pendientes (log-log)}
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item Euler PC: $\approx 2$
+                \item Verlet (v lageada): $\approx 2$
+                \item Beeman PC: $\approx 4$
+                \item Gear-5 ($\alpha_0 = 3/16$): $\approx 10$
+            \end{itemize}
+            \vspace{0.1cm}
+            \textbf{Conclusión}
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item Gear-5 minimiza el ECM con mayor orden.
+                \item Piso numérico de Gear-5 alcanzado para $\Delta t \lesssim \SI{e-3}{s}$.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \framecite{Gear (1966); Teórica 4, slide 29}
+\end{frame}
+
+% =============================================================================
+% SISTEMA 2 -- el resto de la presentación
+% =============================================================================
+\section{Sistema 2}
+
+\begin{frame}[plain,c]
+    \centering
+    {\usebeamercolor[fg]{structure}\fontsize{42}{50}\selectfont Sistema 2\par}
+    \vspace{0.5cm}
+    {\large Recinto circular con obstáculo fijo}\par
+    {\large DM regida por paso temporal con fuerza elástica blanda}
+\end{frame}
+
+% -- Sistema particular -------------------------------------------------------
+\begin{frame}{Sistema particular}
+    \begin{columns}[T]
+        \begin{column}{0.55\textwidth}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item Recinto circular de diámetro $L = \SI{80}{m}$.
+                \item Obstáculo fijo central, radio $r_0 = \SI{1}{m}$.
+                \item $N$ partículas; $r = \SI{1}{m}$, $m = \SI{1}{kg}$.
+                \item $|\vect{v}_0| = \SI{1}{m/s}$, dirección uniforme $\in [0,2\pi)$.
+                \item Distribución inicial uniforme, sin solapamiento.
+                \item Fuerza elástica blanda de a pares:
+                \begin{itemize}
+                    \item $\vect{F}_{ij} = -k\,\xi\,\hat{\vect{e}}_{ij}$ si $\xi > 0$.
+                    \item $\xi = r_i + r_j - |\vect{x}_i - \vect{x}_j|$.
+                \end{itemize}
+                \item Obstáculo y borde: masa infinita, misma forma.
+                \item Estados:
+                \begin{itemize}
+                    \item \textcolor{green!55!black}{\textbf{Fresca}}: toca obstáculo $\rightarrow$ usada.
+                    \item \textcolor{violet!70!black}{\textbf{Usada}}: toca borde $\rightarrow$ fresca.
+                \end{itemize}
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.45\textwidth}
+            \centering
+            \begin{tikzpicture}[scale=0.85]
+                \draw[thick] (0,0) circle (3);
+                \fill[violet!70!black] (0,0) circle (0.25);
+                \foreach \x/\y in {1.2/0.5, -1.5/0.8, 0.3/-1.8, 1.8/-1.2, -0.9/-2.1, -2.0/-0.4, 0.7/2.1, 1.9/1.5}
+                \fill[green!60!black] (\x,\y) circle (0.12);
+                \foreach \x/\y in {-0.5/1.6, 2.2/0.3, -1.8/1.8}
+                \fill[violet!70!black] (\x,\y) circle (0.12);
+                \draw[<->] (-3,-3.4) -- (3,-3.4) node[midway,below,font=\small]{$L$};
+                \node[font=\scriptsize] at (0.5,0.15) {$r_0$};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% -- Implementación: solo motor -----------------------------------------------
+\begin{frame}{Motor de simulación}
+    \begin{enumerate}\setlength\itemsep{2pt}
+        \item Sembrar $N$ partículas (rejection sampling): posiciones sin solapamiento; $|\vect{v}| = v_0$, ángulo uniforme.
+        \item Indexar en \emph{Cell Index Method} (celda $= 2r$): vecinos en $\mathcal{O}(1)$.
+        \item \textbf{Mientras} $t < t_f$:
+        \begin{enumerate}\setlength\itemsep{1pt}
+            \item Calcular fuerzas: pares en contacto ($\xi>0$), obstáculo, borde. \hfill $\mathcal{O}(N)$
+            \item Integrar Velocity-Verlet 2D un paso $\Delta t$. \hfill $\mathcal{O}(N)$
+            \item Actualizar flags de contacto y estado (fresca/usada).
+            \item Muestrear cada $\Delta t_2$ para perfiles; $C_{fc}$ con resolución $\Delta t$.
+        \end{enumerate}
+    \end{enumerate}
+    \vspace{0.3cm}
+    \textbf{Integrador:} Velocity-Verlet 2D (symplectic, $\vect{F}(\vect{x})$ sin dependencia en $\vect{v}$).
+    \framecite{Teórica 4, slide 17}
+\end{frame}
+
+% -- Observables --------------------------------------------------------------
+\begin{frame}{Observables}
+    \textbf{Cambio de estado:}
+    \[
+        C_{fc}(t) = \#\{\text{transiciones fresca}\to\text{usada en }[0,t]\},
+        \qquad
+        J = \left.\frac{\mathrm{d}\,C_{fc}}{\mathrm{d}t}\right|_{\text{estac.}}
+    \]
+    \vspace{-0.1cm}
+    Sólo se cuenta el \textbf{primer $\Delta t$} de cada contacto con el obstáculo.
+
+    \vspace{0.3cm}
+    \textbf{Perfiles radiales} (capas $\mathrm{d}S = \SI{0.2}{m}$; partículas frescas con $\vect{x}_j\!\cdot\!\vect{v}_j < 0$):
+    \[
+        \langle\rho_f^{\,\text{in}}\rangle(S) = \frac{1}{M\,T}\sum_{k,t}\frac{n_k^{\,\text{in}}(S,t)}{A(S)},
+        \quad
+        |\langle v_f^{\,\text{in}}\rangle(S)| = \left|\frac{1}{M\,T}\sum_{k,t}\frac{1}{n_k^{\,\text{in}}}\!\!\sum_{j\in P_f^{\,\text{in}}}\!\!\tfrac{\vect{x}_j\!\cdot\!\vect{v}_j}{|\vect{x}_j|}\right|
+    \]
+    \[
+        J_{\text{in}}(S) = \langle\rho_f^{\,\text{in}}\rangle(S)\,|\langle v_f^{\,\text{in}}\rangle(S)|
+    \]
+\end{frame}
+
+% -- Parámetros y realizaciones ----------------------------------------------
+\begin{frame}{Parámetros de simulación y realizaciones}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \textbf{Parámetros variables}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item $N \in [100, 1000]$.
+                \item $k \in \{10^2, 10^3, 10^4\}$ \si{N/m}.
+                \item $k_{\text{ref}} = 10^3$ \si{N/m}.
+            \end{itemize}
+            \vspace{0.2cm}
+            \textbf{Parámetros fijos}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item $t_f = \SI{500}{s}$.
+                \item $\Delta t_2 = \SI{0.05}{s}$ (muestreo).
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \textbf{$\Delta t$ por $k$} (validado con $E(t)$)
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item $k = 10^2$: $\Delta t \approx \SI{6.3e-3}{s}$.
+                \item $k = 10^3$: $\Delta t \approx \SI{2.0e-3}{s}$.
+                \item $k = 10^4$: $\Delta t \approx \SI{6.3e-4}{s}$.
+            \end{itemize}
+            \vspace{0.2cm}
+            \textbf{Realizaciones}: $M = 10$ por $(N,k)$.\\
+            \textbf{Ventana estacionaria}: $t \in [t_f/2, t_f]$.
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% =============================================================================
+% ANIMACIONES (máx. 2)
+% =============================================================================
+\begin{frame}{Animación -- $N = 100$, $k = 10^{3}$}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \simvideo{$N=100$}{N=100}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Condiciones}
+            \begin{itemize}
+                \item $N = 100$
+                \item $k = 10^{3}$ \si{N/m}
+                \item $\Delta t = \SI{2e-3}{s}$
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Animación -- $N = 1000$, $k = 10^{3}$}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \simvideo{$N=1000$}{N=1000}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Condiciones}
+            \begin{itemize}
+                \item $N = 1000$
+                \item $k = 10^{3}$ \si{N/m}
+                \item $\Delta t = \SI{2e-3}{s}$
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% =============================================================================
+% RESULTADOS
+% =============================================================================
+\section{Resultados}
+
+\begin{frame}{Validación de $\Delta t$ -- evolución de $E_{\text{total}}(t)$}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/03a_s2_energy_validation.png}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{$E_{\text{total}} = E_{\text{cin}} + E_{\text{pot}}$}
+            \[
+                E_{\text{pot}} = \tfrac{1}{2}k\sum_{\text{contactos}}\xi^2
+            \]
+            \vspace{0.2cm}
+            \textbf{Criterio}
+            \begin{itemize}
+                \item Deriva relativa $< 1\%$ durante $t_f$.
+                \item Velocity-Verlet conserva $E$ a largo plazo (symplectic).
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% -- 1.1 Tiempo de ejecución --------------------------------------------------
+\begin{frame}{Tiempo de ejecución vs.\ $N$ (1.1)}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/04_s2_timing.png}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Condiciones}
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item $t_f = \SI{500}{s}$
+                \item $k = 10^{3}$ \si{N/m}
+                \item 1 realización por $N$
+            \end{itemize}
+            \vspace{0.2cm}
+            \textbf{Observación}
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item Log-log: ley de potencia $t_{\text{exec}} \propto N^{\alpha}$.
+                \item DM time-driven $<$ EDMD para $N$ grande.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \framecite{Comparación con TP3 -- mismo $t_f$}
+\end{frame}
+
+% -- 1.2 Cfc(t) y J(N) --------------------------------------------------------
+\begin{frame}{Evolución temporal de $C_{fc}(t)$ (1.2)}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/05_s2_cfc_t.png}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Observación}
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item Régimen estacionario desde $t \approx 0$.
+                \item Pendiente lineal $\Rightarrow J(N)$ por ajuste.
+                \item Sólo el primer $\Delta t$ de cada contacto cuenta.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Scanning rate $\langle J\rangle$ vs.\ $N$ (1.2)}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/06_s2_j_vs_n.png}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Observación}
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item Crece y satura con $N$.
+                \item Barras de error: desvío sobre $M = 10$ realizaciones.
+                \item Comparable a $J(N)$ del TP3 en orden de magnitud.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \framecite{Comparación con TP3 -- $J(N)$ por EDMD}
+\end{frame}
+
+% -- 1.3 Perfiles radiales ----------------------------------------------------
+\begin{frame}{Perfiles radiales -- $J_{\text{in}}(S)$ (1.3)}
+    \begin{center}
+        \includegraphics[width=0.96\linewidth,height=0.78\textheight,keepaspectratio]{figures/07_s2_radial.png}
+    \end{center}
+    \framecite{Paleta gradual + colorbar para variable numérica $N$}
+\end{frame}
+
+\begin{frame}{Observables radiales cerca del obstáculo vs.\ $N$ (1.3)}
+    \begin{columns}[T]
+        \begin{column}{0.98\textwidth}
+            \centering
+            \includegraphics[width=\linewidth,height=0.78\textheight,keepaspectratio]{figures/08_s2_radial_near.png}
+        \end{column}
+    \end{columns}
+    \framecite{Promedio en $S \in [1.5, 5]$ \si{m}; comparación $J_{\text{in}}$ con TP3}
+\end{frame}
+
+% -- 1.4 Variación de k -------------------------------------------------------
+\begin{frame}{Barrido en $k$ -- $\langle J\rangle$ y $\langle J_{\text{in}}|_{S\sim 2}\rangle$ vs.\ $N$ (1.4)}
+    \begin{center}
+        \includegraphics[width=0.96\linewidth,height=0.78\textheight,keepaspectratio]{figures/09_s2_k_sweep.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Escalar característico vs.\ $k$ (1.4)}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/10_s2_k_scalar.png}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Escalar}: $\max_N \langle J\rangle(N,k)$
+            \vspace{0.2cm}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item Crece con $k$ y satura hacia el límite event-driven.
+                \item Contacto más rígido $\Rightarrow$ menor tiempo de permanencia $\Rightarrow$ mayor $J$.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% =============================================================================
+% CONCLUSIONES
+% =============================================================================
+\section{Conclusiones}
+
+\begin{frame}{Conclusiones}
+    \begin{itemize}\setlength\itemsep{4pt}
+        \item \textbf{Sistema 1}: Gear-5 con $\alpha_0 = 3/16$ minimiza el ECM en todo el rango de $\Delta t$ estudiado; pendientes en log-log consistentes con el orden teórico de cada integrador.
+        \item \textbf{Sistema 2}: el scanning rate $\langle J\rangle$ crece con $N$ y satura; el régimen cerca del obstáculo está dominado por la densidad de partículas frescas entrantes.
+        \item La fuerza elástica blanda con $k$ creciente reproduce el límite event-driven del TP3.
+        \item DM time-driven escala mejor con $N$ que EDMD en el rango estudiado.
+    \end{itemize}
+\end{frame}
+
+% =============================================================================
+% CIERRE
+% =============================================================================
+{
+    \setbeamertemplate{footline}{}
+    \begin{frame}[plain,c]
+        \centering
+        {\fontsize{48}{56}\selectfont Muchas gracias\par}
+    \end{frame}
+}
+
+\end{document}
