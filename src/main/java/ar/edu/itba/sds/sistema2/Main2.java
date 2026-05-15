@@ -24,7 +24,8 @@ public final class Main2 {
         double tf = Double.parseDouble(opts.getOrDefault("tf", "500"));
         double k = Double.parseDouble(opts.getOrDefault("k", "1000"));
         int realizations = Integer.parseInt(opts.getOrDefault("realizations", "10"));
-        Path out = Path.of("results", "s2");
+        boolean append = Boolean.parseBoolean(opts.getOrDefault("append", "false"));
+        Path out = Path.of(opts.getOrDefault("outdir", "results/s2"));
 
         switch (experiment) {
             case "energy" -> {
@@ -59,13 +60,13 @@ public final class Main2 {
             }
             case "timing" -> {
                 int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
-                TimingExperiment.run(Ns, k, tf, baseSeed, out);
+                TimingExperiment.run(Ns, k, tf, baseSeed, out, append);
             }
             case "jvsn" -> {
                 int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
                 double dt = Geometry.dtForK(k);
                 double dt2 = Double.parseDouble(opts.getOrDefault("dt2", "0.05"));
-                JvsNExperiment.runSweep(Ns, realizations, k, tf, dt, dt2, baseSeed, out);
+                JvsNExperiment.runSweep(Ns, realizations, k, tf, dt, dt2, baseSeed, out, append);
             }
             case "animate" -> {
                 int N = Integer.parseInt(opts.getOrDefault("N", "100"));
@@ -81,7 +82,7 @@ public final class Main2 {
                 double[] ks = parseDoubles(opts.getOrDefault("ks", "100,1000,10000"));
                 int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
                 double dt2 = Double.parseDouble(opts.getOrDefault("dt2", "0.05"));
-                KSweepExperiment.run(ks, Ns, realizations, tf, dt2, baseSeed, out);
+                KSweepExperiment.run(ks, Ns, realizations, tf, dt2, baseSeed, out, append);
             }
             default -> {
                 System.err.println("Unknown experiment: " + experiment);

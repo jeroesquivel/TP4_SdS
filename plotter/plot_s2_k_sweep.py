@@ -15,6 +15,7 @@ def k_label(k):
 
 def main():
     df = pd.read_csv(RESULTS / "s2" / "k_sweep.csv")
+    df = df[df["N"] % 100 == 0]
     ks = sorted(df["k"].unique())
     cmap = get_cmap(GRADIENT_CMAP)
     norm = LogNorm(vmin=min(ks), vmax=max(ks))

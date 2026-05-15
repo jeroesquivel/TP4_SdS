@@ -5,6 +5,7 @@ from _style import RESULTS, FIGURES, TP3_DATA, plain_log_axis
 
 def main():
     df = pd.read_csv(RESULTS / "s2" / "j_vs_n.csv").sort_values("N")
+    df = df[df["N"] % 100 == 0]
     fig, ax = plt.subplots(figsize=(8.4, 5.0))
 
     ax.errorbar(df["N"], df["J_mean"], yerr=df["J_std"],

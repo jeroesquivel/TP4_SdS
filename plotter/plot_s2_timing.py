@@ -6,6 +6,7 @@ from _style import RESULTS, FIGURES, TP3_DATA, plain_log_axis
 
 def main():
     df = pd.read_csv(RESULTS / "s2" / "timing.csv").sort_values("N")
+    df = df[df["N"] % 100 == 0]
     fig, ax = plt.subplots(figsize=(8.4, 5.2))
 
     # TP4 — el ajuste se sigue haciendo en log-log para extraer el exponente,

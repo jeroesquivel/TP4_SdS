@@ -16,6 +16,7 @@ import ar.edu.itba.sds.sistema2.observables.RadialProfileAccumulator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -26,11 +27,12 @@ public final class KSweepExperiment {
     private static final double S_NEAR_HI = 3.0;
 
     public static void run(double[] ks, int[] Ns, int realizations, double tf, double dt2,
-                           long baseSeed, Path outDir) throws IOException {
+                           long baseSeed, Path outDir, boolean append) throws IOException {
         Path csv = outDir.resolve("k_sweep.csv");
+        boolean writeHeader = !append || !Files.exists(csv);
         Stopwatch swTotal = new Stopwatch().start();
-        try (BufferedWriter w = CsvWriter.open(csv)) {
-            CsvWriter.writeLine(w, "k,N,J_mean,J_std,J_in_S2_mean,realizations,tf,dt");
+        try (BufferedWriter w = append ? CsvWriter.openAppend(csv) : CsvWriter.open(csv)) {
+            if (writeHeader) CsvWriter.writeLine(w, "k,N,J_mean,J_std,J_in_S2_mean,realizations,tf,dt");
             int totalCombinations = ks.length * Ns.length;
             int doneCombinations = 0;
             for (double k : ks) {

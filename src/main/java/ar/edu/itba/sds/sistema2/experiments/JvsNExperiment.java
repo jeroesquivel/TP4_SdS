@@ -16,6 +16,7 @@ import ar.edu.itba.sds.sistema2.observables.RadialProfileAccumulator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -88,11 +89,12 @@ public final class JvsNExperiment {
     }
 
     public static void runSweep(int[] Ns, int realizations, double k, double tf, double dt, double dt2,
-                                long baseSeed, Path outDir) throws IOException {
+                                long baseSeed, Path outDir, boolean append) throws IOException {
         Path jCsv = outDir.resolve("j_vs_n.csv");
+        boolean writeHeader = !append || !Files.exists(jCsv);
         Stopwatch swTotal = new Stopwatch().start();
-        try (BufferedWriter w = CsvWriter.open(jCsv)) {
-            CsvWriter.writeLine(w, "N,J_mean,J_std,k,realizations,tf");
+        try (BufferedWriter w = append ? CsvWriter.openAppend(jCsv) : CsvWriter.open(jCsv)) {
+            if (writeHeader) CsvWriter.writeLine(w, "N,J_mean,J_std,k,realizations,tf");
             int totalSteps = (int) Math.round(tf / dt);
             System.out.printf("[jvsn] dt=%.3e tf=%.0fs k=%.0e  → %d pasos por realización%n",
                     dt, tf, k, totalSteps);

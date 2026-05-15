@@ -13,16 +13,18 @@ import ar.edu.itba.sds.sistema2.io.CsvWriter;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 public final class TimingExperiment {
     private TimingExperiment() {}
 
-    public static void run(int[] Ns, double k, double tf, long baseSeed, Path outDir) throws IOException {
+    public static void run(int[] Ns, double k, double tf, long baseSeed, Path outDir, boolean append) throws IOException {
         Path csv = outDir.resolve("timing.csv");
-        try (BufferedWriter w = CsvWriter.open(csv)) {
-            CsvWriter.writeLine(w, "N,t_exec_s,dt,tf,k");
+        boolean writeHeader = !append || !Files.exists(csv);
+        try (BufferedWriter w = append ? CsvWriter.openAppend(csv) : CsvWriter.open(csv)) {
+            if (writeHeader) CsvWriter.writeLine(w, "N,t_exec_s,dt,tf,k");
             double dt = Geometry.dtForK(k);
             int totalSteps = (int) Math.round(tf / dt);
             System.out.printf("[timing] dt=%.3e tf=%.0fs k=%.0e  → %d pasos por corrida%n",
