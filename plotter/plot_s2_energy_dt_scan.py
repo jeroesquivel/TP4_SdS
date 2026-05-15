@@ -70,9 +70,19 @@ def main():
             c = cmap(norm(dt))
             ax.plot(df["t"], rel, color=c, lw=1.4, alpha=0.95)
             t_max = max(t_max, df["t"].max())
+
+            t_arr = df["t"].to_numpy()
+            rel_arr = rel.to_numpy()
+            mask = np.isfinite(t_arr) & np.isfinite(rel_arr)
+            if mask.sum() >= 2:
+                slope, _ = np.polyfit(t_arr[mask], rel_arr[mask], 1)
+            else:
+                slope = np.nan
+
             max_drift_rows.append({
                 "k": k, "dt": dt,
                 "max_abs": float(np.abs(rel).max()),
+                "slope": float(slope),
             })
 
         ax.axhline(+DRIFT_TOL, color="0.35", lw=0.9, ls=":", alpha=0.75)
@@ -100,7 +110,7 @@ def main():
     cb.set_ticklabels([f"{dt:.0e}" for dt in all_dts])
     cb.ax.minorticks_off()
 
-    fig.suptitle(r"Conservación de energía vs. $\Delta t$  —  N=100,  $t_f$=2000 s",
+    fig.suptitle(r"Conservación de energía vs. $\Delta t$  —  N=800,  $t_f$=2000 s",
                  fontsize=14)
 
     out = FIGURES / "03d_s2_energy_dt_scan.png"
@@ -131,13 +141,35 @@ def main():
 
     ax.set_xlabel(r"$\Delta t$  [s]")
     ax.set_ylabel(r"$\max_t\,|\Delta E_{tot}/E_0|$")
-    ax.set_title(r"Umbral de $\Delta t$ vs. k  —  N=100,  $t_f$=2000 s")
+    ax.set_title(r"Umbral de $\Delta t$ vs. k  —  N=800,  $t_f$=2000 s")
     ax.legend(loc="upper left", frameon=True, framealpha=0.95,
               handlelength=2.2)
 
     out2 = FIGURES / "03e_s2_energy_dt_max.png"
     fig2.savefig(out2)
     print("→", out2)
+
+    # =========== Fig 3: |Se| vs Δt, una curva por k ===========
+    # Se = pendiente de (ΔE_tot/E_0) vs t (regresión lineal), en s^{-1}.
+    fig3, ax3 = plt.subplots(figsize=(8.4, 5.0))
+
+    for k in ks:
+        sub = md[md["k"] == k].sort_values("dt")
+        y = sub["slope"].abs().replace([np.inf, -np.inf], np.nan)
+        ax3.loglog(sub["dt"], y, "o-",
+                   color=cmap_k(norm_k(k)), lw=1.8, markersize=7,
+                   markerfacecolor="white", markeredgewidth=1.5,
+                   label=f"k = {k_label(k)} N/m")
+
+    ax3.set_xlabel(r"$\Delta t$  [s]")
+    ax3.set_ylabel(r"$|S_e|$  [s$^{-1}$]")
+    ax3.set_title(r"Pendiente del error $S_e$ vs. $\Delta t$  —  N=800,  $t_f$=2000 s")
+    ax3.legend(loc="upper left", frameon=True, framealpha=0.95,
+               handlelength=2.2)
+
+    out3 = FIGURES / "03f_s2_energy_dt_slope.png"
+    fig3.savefig(out3)
+    print("→", out3)
 
 
 if __name__ == "__main__":

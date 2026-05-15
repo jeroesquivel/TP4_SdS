@@ -45,9 +45,9 @@ public final class Main2 {
                     EnergyDtScanExperiment.runSweep(N, ks, dts, tfScan, baseSeed, integ, out);
                 } else {
                     double[][] ksDts = {
-                            {100.0,   5e-3, 1e-2, 5e-2},
+                            {100.0, 3e-3, 5e-3, 1e-2, 5e-2},
                             {1000.0,  5e-4, 3e-3, 5e-3, 1e-2},
-                            {10000.0, 5e-4, 1e-3, 5e-3},
+                            {10000.0, 5e-4, 1e-3, 3e-3, 5e-3},
                     };
                     for (double[] row : ksDts) {
                         double kVal = row[0];
