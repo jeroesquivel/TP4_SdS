@@ -595,6 +595,32 @@
   <p>Doble eje y, escala log en ambos ejes.</p>
 </template>
 
+<template id="g7">
+  <h3>Comparación con TP3 (event-driven)</h3>
+  <p>La consigna del TP4 pide tres comparaciones explícitas contra el TP3:</p>
+  <ol style="margin: 0 0 10px 18px; padding: 0;">
+    <li><strong>1.1</strong> — Tiempos de ejecución vs N (DM vs EDMD). Ya está en el plot <strong>04</strong> con la curva TP3 superpuesta.</li>
+    <li><strong>1.2</strong> — Scanning rate <code>J(N)</code> (TP4 vs TP3). Ya está en el plot <strong>06</strong> con la curva TP3 superpuesta.</li>
+    <li><strong>1.3</strong> — <code>J^in(N)</code> del TP4 en anillos pequeños vs <code>J(N)</code> global del TP3. Este es el plot 13 — corrige una falencia explícita marcada por el corrector del TP3.</li>
+  </ol>
+
+  <h4>13 · J<sup>in</sup>(N) TP4 vs. J(N) TP3 — anillo cercano al obstáculo</h4>
+  <p class="fname">figures/13_s2_jin_vs_tp3.png</p>
+  <p class="goal"><strong>Objetivo:</strong> mostrar que el flujo local que llega al obstáculo (<code>J^in</code> en <code>S ∈ [1.5, 3]</code> m) sigue el mismo patrón no monótono que el scanning rate global del TP3. Es la conexión cuantitativa entre el observable local del TP4 y el observable global del TP3.</p>
+  <h3>Descripción</h3>
+  <p>Tres curvas en el mismo eje:</p>
+  <ul>
+    <li><strong>TP3 (rojo, ─ ─):</strong> <code>J(N)</code> del TP3 (EDMD), calculado como pendiente de <code>C_fc(t)</code> sobre la segunda mitad temporal de cada corrida (<code>tf ≈ 1500 s</code>). N ∈ {10, 50, 100, 200, 400, 800}.</li>
+    <li><strong>TP4 azul (─):</strong> <code>J(N)</code> global del TP4 (mismo observable). N ∈ {100, ..., 1000}, M=10.</li>
+    <li><strong>TP4 verde (⋯):</strong> <code>J^in(N)</code> del TP4 promediado en el anillo cercano <code>S ∈ [1.5, 3]</code> m, multiplicado por un factor constante (≈ 13.2) para superponerlo al rango de <code>J</code>. Este factor es el promedio del ratio <code>J/J^in</code> sobre los N del TP4.</li>
+  </ul>
+  <p>El reescalado constante es legítimo: <code>J</code> y <code>J^in</code> tienen unidades distintas (s⁻¹ vs m⁻¹·s⁻¹) y miden cosas distintas, pero deberían exhibir la misma <em>dependencia funcional</em> con N si describen el mismo fenómeno físico. Que las tres curvas tengan el pico en la misma zona (N ~ 400–500) <strong>confirma esa hipótesis</strong>.</p>
+
+  <h4>Origen de los datos TP3</h4>
+  <p class="fname">tp3_data/{j_vs_n.csv, timing.csv}</p>
+  <p>Generados por <code>scripts/build_tp3_data.py</code> a partir de los archivos crudos del TP3 (en el proyecto vecino <code>~/Desktop/ITBA/26-1C/SDS/TP3_SDS/results/</code>): <code>cfc_sim_N_*_run_1.txt</code> y <code>timing.csv</code>. El timing se renombra para coincidir con la convención de columnas del TP4; el J(N) se calcula con regresión lineal sobre la segunda mitad temporal de cada serie de C_fc.</p>
+</template>
+
 <template id="g6">
   <h3>Zoom — Franja crítica N ∈ [400, 600]</h3>
   <p>Detalle de la zona donde ⟨J⟩(N) alcanza su máximo, con grilla densa cada 25 partículas (M=10 realizaciones). Eje x lineal para que la separación visual sea uniforme.</p>
@@ -648,6 +674,20 @@
   </ul>
 </template>
 
+<!-- ============== Comparación con TP3 ============== -->
+<div class="section-title">
+  Comparación con TP3 (event-driven)
+  <button class="group-info-btn" data-group="g7">info</button>
+</div>
+<section class="grid">
+  <article class="card" data-group="g7">
+    <div class="info-badge">i</div>
+    <h2>J<sup>in</sup>(N) TP4 vs. J(N) TP3 — anillo cercano al obstáculo</h2>
+    <div class="file">figures/13_s2_jin_vs_tp3.png</div>
+    <img src="figures/13_s2_jin_vs_tp3.png" alt="Comparación J^in TP4 vs J TP3">
+  </article>
+</section>
+
 <!-- ============== Sandboxes ============== -->
 <div class="section-title">
   Sandboxes — Pruebas paralelizables
@@ -657,7 +697,7 @@
   <h3>Flujo</h3>
   <p><strong>1.</strong> Una sola vez antes de spawnear cualquier sandbox (compila y materializa classpath para que Maven no pelee con sí mismo entre runs paralelos):</p>
   <div class="cmd">bash scripts/prep_sandbox_parallel.sh<button class="cmd-copy">copiar</button></div>
-  <p><strong>2.</strong> Lanzá cada sandbox en una terminal aparte. Cada uno genera su CSV en <code>results/&lt;SANDBOX_NAME&gt;/</code>, su PNG en <code>figures/sandbox_&lt;SANDBOX_NAME&gt;.png</code> (el plotter se ejecuta automáticamente al final del run) y su log en <code>results/log/&lt;SANDBOX_NAME&gt;.log</code>. Nada toca <code>results/s2/</code> ni los plots principales.</p>
+  <p><strong>2.</strong> Lanzá cada sandbox en una terminal aparte. Cada uno genera su CSV en <code>results/&lt;SANDBOX_NAME&gt;/</code>, su PNG en <code>figures/sandbox/&lt;SANDBOX_NAME&gt;.png</code> (el plotter se ejecuta automáticamente al final del run) y su log en <code>results/log/&lt;SANDBOX_NAME&gt;.log</code>. Nada toca <code>results/s2/</code> ni los plots principales.</p>
   <p><strong>3.</strong> Rollback total (cualquier momento): <code>bash scripts/rollback_sandbox.sh</code></p>
 </div>
 
@@ -668,7 +708,7 @@
     <div class="sb-meta">M=30 · 9 N's · 3 k's · seed=999 · ~2 h</div>
     <p>Réplica del sandbox actual con semilla distinta. Si esta corrida y la del <em>run M30</em> original coinciden dentro de las barras de error, la estadística de M=30 es robusta. Si no coinciden, M=30 no alcanza y conviene escalar a M=50.</p>
     <div class="cmd">SANDBOX_NAME=sb_M30_alt  M=30  SEED=999  bash scripts/run_s2_sandbox.sh<button class="cmd-copy">copiar</button></div>
-    <div class="out-fig" data-fig="figures/sandbox_sb_M30_alt.png"></div>
+    <div class="out-fig" data-fig="figures/sandbox/sb_M30_alt.png"></div>
   </article>
 
   <article class="sb-card">
@@ -676,7 +716,7 @@
     <div class="sb-meta">M=50 · 9 N's · 3 k's · seed=100 · ~3.5 h</div>
     <p>SEM cae a ~1.8% del valor medio, por debajo de las diferencias típicas entre puntos vecinos (3–5%). Es el corte donde la curva del zoom se vuelve interpretable: si hay un pico nítido, acá se ve.</p>
     <div class="cmd">SANDBOX_NAME=sb_M50  M=50  SEED=100  bash scripts/run_s2_sandbox.sh<button class="cmd-copy">copiar</button></div>
-    <div class="out-fig" data-fig="figures/sandbox_sb_M50.png"></div>
+    <div class="out-fig" data-fig="figures/sandbox/ksweep_zoom_M50_3ks.png"></div>
   </article>
 
   <article class="sb-card">
@@ -684,7 +724,7 @@
     <div class="sb-meta">M=100 · 9 N's · k=10³ únicamente · seed=200 · ~2 h</div>
     <p>Concentra el presupuesto computacional en el caso central (<code>k = 10³</code> N/m). Con M=100, SEM ~1.3%. Sirve para responder definitivamente si hay <strong>pico nítido o meseta plana</strong> entre N=450 y N=600 para el k de referencia.</p>
     <div class="cmd">SANDBOX_NAME=sb_M100_k3  KS=1000  M=100  SEED=200  bash scripts/run_s2_sandbox.sh<button class="cmd-copy">copiar</button></div>
-    <div class="out-fig" data-fig="figures/sandbox_sb_M100_k3.png"></div>
+    <div class="out-fig" data-fig="figures/sandbox/ksweep_zoom_M100_k1e3.png"></div>
   </article>
 
   <article class="sb-card">
@@ -693,7 +733,7 @@
     <p>La consigna del ítem 1.4 propone <code>k ∈ {10², 10³, 10⁴, 10⁵}</code> N/m pero el barrido actual sólo tiene los primeros tres. Este sandbox agrega <code>k = 10⁵</code> para tener el cuarto punto en el plot de <code>max⟨J⟩(k)</code> y <code>N⋆(k)</code> — pasar de 3 a 4 puntos hace una diferencia enorme para identificar (o descartar) una ley de potencia.</p>
     <p>El dt resultante es <code>τ/100 ≈ 2·10⁻⁴ s</code>, así que cada realización es ~3× más cara que k=10⁴ (2.5M pasos vs 800K). Cabe en ~1 h con M=30 sólo para este k.</p>
     <div class="cmd">SANDBOX_NAME=sb_k5  KS=100000  M=30  SEED=500  bash scripts/run_s2_sandbox.sh<button class="cmd-copy">copiar</button></div>
-    <div class="out-fig" data-fig="figures/sandbox_sb_k5.png"></div>
+    <div class="out-fig" data-fig="figures/sandbox/ksweep_zoom_M30_k1e5.png"></div>
   </article>
 
   <article class="sb-card">
@@ -702,7 +742,7 @@
     <p>El <code>j_vs_n.csv</code> y <code>radial_N*.csv</code> del main run usan M=10. Este sandbox corre el experimento <strong>jvsn</strong> (no ksweep) con M=30 sólo en la franja, para tener barras de error más limpias en el plot 06 y perfiles radiales más suaves para los plots 07–08. Además del CSV agregado, genera <code>radial_N*.csv</code> en la sandbox que se pueden usar para regenerar los perfiles radiales con mejor estadística.</p>
     <p><strong>Nota</strong>: este sandbox usa la rama <code>EXPERIMENT=jvsn</code> del script (en lugar del default <code>ksweep</code>). El plotter de output es <code>plot_s2_j_vs_n_sandbox.py</code>.</p>
     <div class="cmd">EXPERIMENT=jvsn  SANDBOX_NAME=sb_jvsn_M30  K=1000  M=30  SEED=42  bash scripts/run_s2_sandbox.sh<button class="cmd-copy">copiar</button></div>
-    <div class="out-fig" data-fig="figures/sandbox_sb_jvsn_M30.png"></div>
+    <div class="out-fig" data-fig="figures/sandbox/jvsn_M30_franja.png"></div>
   </article>
 
   <article class="sb-card">
@@ -710,7 +750,7 @@
     <div class="sb-meta">M=30 · 11 N's (400, 420, ..., 600) · 3 k's · seed=300 · ~2.5 h</div>
     <p>Aumenta la resolución espacial de N=25 a N=20. Si el pico tiene una estructura más fina que 25 partículas (curva en forma de "doble joroba", por ejemplo), acá aparecería. Si la curva sigue siendo plana, confirma que el comportamiento es genuinamente una meseta.</p>
     <div class="cmd">SANDBOX_NAME=sb_fine20  NS=400,420,440,460,480,500,520,540,560,580,600  M=30  SEED=300  bash scripts/run_s2_sandbox.sh<button class="cmd-copy">copiar</button></div>
-    <div class="out-fig" data-fig="figures/sandbox_sb_fine20.png"></div>
+    <div class="out-fig" data-fig="figures/sandbox/sb_fine20.png"></div>
   </article>
 
 </section>

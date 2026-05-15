@@ -18,12 +18,12 @@ cd "$(dirname "$0")/.."
 if [[ $# -ge 1 ]]; then
     NAME="$1"
     DIR_GLOB="results/$NAME"
-    FIG_GLOB="figures/sandbox_${NAME}*.png"
+    FIG_GLOB="figures/sandbox/${NAME}*.png figures/sandbox_${NAME}*.png"
     LOG_GLOB="results/log/${NAME}.log"
     echo "Rollback sandbox específico: $NAME"
 else
-    DIR_GLOB="results/s2_sandbox*"
-    FIG_GLOB="figures/sandbox_*.png"
+    DIR_GLOB="results/s2_sandbox* results/sb_*"
+    FIG_GLOB="figures/sandbox/*.png figures/sandbox_*.png"
     LOG_GLOB="results/log/s2_sandbox*.log results/log/sb_*.log"
     echo "Rollback sandbox: TODOS"
 fi

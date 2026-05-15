@@ -56,7 +56,7 @@ def main():
         out = Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)
     else:
-        out = FIGURES / f"sandbox_jvsn_M{M}.png"
+        out = FIGURES / "sandbox" / f"jvsn_M{M}.png"
     fig.savefig(out)
     print("→", out)
 

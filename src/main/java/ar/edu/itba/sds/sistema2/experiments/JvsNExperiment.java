@@ -26,7 +26,8 @@ public final class JvsNExperiment {
     public record Result(int N, double jMean, double jStd, RadialProfileAccumulator radial) {}
 
     public static Result runForN(int N, int realizations, double k, double tf, double dt, double dt2,
-                                 long baseSeed, Path outDir, boolean writePerRealization) throws IOException {
+                                 long baseSeed, Path outDir, boolean writePerRealization,
+                                 double radialTMin) throws IOException {
         int totalSteps = (int) Math.round(tf / dt);
         int sampleEverySteps = Math.max(1, (int) Math.round(dt2 / dt));
         int snapshotEvery = sampleEverySteps;
@@ -65,7 +66,7 @@ public final class JvsNExperiment {
                         double ep = fmh.potentialEnergy();
                         CsvWriter.writeLine(enW, String.format("%.6e,%.6e,%.6e,%.6e", t, ek, ep, ek + ep));
                     }
-                    if (step % snapshotEvery == 0 && t >= tf / 2.0) {
+                    if (step % snapshotEvery == 0 && t >= radialTMin) {
                         radial.snapshot(particles);
                     }
                 } catch (IOException e) {
@@ -89,7 +90,7 @@ public final class JvsNExperiment {
     }
 
     public static void runSweep(int[] Ns, int realizations, double k, double tf, double dt, double dt2,
-                                long baseSeed, Path outDir, boolean append) throws IOException {
+                                long baseSeed, Path outDir, boolean append, double radialTMin) throws IOException {
         Path jCsv = outDir.resolve("j_vs_n.csv");
         boolean writeHeader = !append || !Files.exists(jCsv);
         Stopwatch swTotal = new Stopwatch().start();
@@ -102,7 +103,7 @@ public final class JvsNExperiment {
                 int N = Ns[idx];
                 Stopwatch swN = new Stopwatch().start();
                 System.out.printf("[jvsn] %d/%d  N=%d  M=%d%n", idx + 1, Ns.length, N, realizations);
-                Result res = runForN(N, realizations, k, tf, dt, dt2, baseSeed, outDir, true);
+                Result res = runForN(N, realizations, k, tf, dt, dt2, baseSeed, outDir, true, radialTMin);
                 swN.stop();
                 CsvWriter.writeLine(w, String.format("%d,%.6e,%.6e,%.3e,%d,%.3f",
                         res.N, res.jMean, res.jStd, k, realizations, tf));

@@ -31,6 +31,8 @@ K="${K:-1000}"
 M="${M:-30}"
 TF="${TF:-500}"
 SEED="${SEED:-42}"
+APPEND="${APPEND:-false}"
+TMIN="${TMIN:-}"         # vacío = default (tf/2); 0 = acumular radial desde t=0
 PLOTTER="${PLOTTER:-}"   # vacío = elegir según EXPERIMENT
 
 if [[ ! -f "target/cp.txt" || ! -d "target/classes" ]]; then
@@ -39,10 +41,10 @@ if [[ ! -f "target/cp.txt" || ! -d "target/classes" ]]; then
 fi
 
 SANDBOX_DIR="results/$SANDBOX_NAME"
-FIG_OUT="figures/sandbox_${SANDBOX_NAME}.png"
+FIG_OUT="figures/sandbox/${SANDBOX_NAME}.png"
 LOG_FILE="results/log/${SANDBOX_NAME}.log"
 
-mkdir -p "$SANDBOX_DIR" "results/log"
+mkdir -p "$SANDBOX_DIR" "results/log" "figures/sandbox"
 
 CP_DEPS="$(cat target/cp.txt)"
 if [[ -n "$CP_DEPS" ]]; then
@@ -77,13 +79,16 @@ if [[ "$EXPERIMENT" == "ksweep" ]]; then
         --tf "$TF" \
         --realizations "$M" \
         --outdir "$SANDBOX_DIR" \
-        --seed "$SEED" 2>&1 | tee -a "$LOG_FILE"
+        --seed "$SEED" \
+        --append "$APPEND" 2>&1 | tee -a "$LOG_FILE"
 
     PLOT_SCRIPT="${PLOTTER:-plotter/plot_s2_k_sweep_zoom_sandbox.py}"
     python3 "$PLOT_SCRIPT" \
         --indir "$SANDBOX_DIR" --out "$FIG_OUT" --label "$SANDBOX_NAME" 2>&1 | tee -a "$LOG_FILE"
 
 elif [[ "$EXPERIMENT" == "jvsn" ]]; then
+    JVSN_EXTRA=()
+    if [[ -n "$TMIN" ]]; then JVSN_EXTRA+=(--tmin "$TMIN"); fi
     java -cp "$CP" ar.edu.itba.sds.sistema2.Main2 \
         --experiment jvsn \
         --k "$K" \
@@ -91,7 +96,8 @@ elif [[ "$EXPERIMENT" == "jvsn" ]]; then
         --tf "$TF" \
         --realizations "$M" \
         --outdir "$SANDBOX_DIR" \
-        --seed "$SEED" 2>&1 | tee -a "$LOG_FILE"
+        --seed "$SEED" \
+        --append "$APPEND" "${JVSN_EXTRA[@]}" 2>&1 | tee -a "$LOG_FILE"
 
     PLOT_SCRIPT="${PLOTTER:-plotter/plot_s2_j_vs_n_sandbox.py}"
     python3 "$PLOT_SCRIPT" \

@@ -31,16 +31,15 @@ def main():
     main_csv = RESULTS / "s2" / "k_sweep.csv"
     sb_csv = Path(args.indir) / "k_sweep.csv"
 
-    dfs = []
-    if main_csv.exists():
-        dfs.append(pd.read_csv(main_csv))
-    else:
-        raise SystemExit(f"Falta {main_csv} — no hay datos base de los 3 ks principales.")
-    if sb_csv.exists():
-        dfs.append(pd.read_csv(sb_csv))
-    else:
-        print(f"[warn] {sb_csv} no existe; sólo se grafican los ks del main.")
-    df = pd.concat(dfs, ignore_index=True)
+    main_df = pd.read_csv(main_csv) if main_csv.exists() else pd.DataFrame()
+    sb_df = pd.read_csv(sb_csv) if sb_csv.exists() else pd.DataFrame()
+    if main_df.empty and sb_df.empty:
+        raise SystemExit("No hay datos en main ni en sandbox.")
+    # Si el sandbox cubre un k, descarta el del main para ese k (evita mezclar seeds/M).
+    if not sb_df.empty and not main_df.empty:
+        sb_ks = set(sb_df["k"].unique())
+        main_df = main_df[~main_df["k"].isin(sb_ks)]
+    df = pd.concat([main_df, sb_df], ignore_index=True)
 
     ks = sorted(df["k"].unique())
     rows = []
@@ -98,7 +97,7 @@ def main():
         out = Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)
     else:
-        out = FIGURES / "sandbox_10_s2_k_scalar_extended.png"
+        out = FIGURES / "sandbox" / "kscalar_extendido.png"
     fig.savefig(out)
     print("→", out)
 

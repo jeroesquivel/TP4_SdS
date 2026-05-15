@@ -66,7 +66,9 @@ public final class Main2 {
                 int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
                 double dt = Geometry.dtForK(k);
                 double dt2 = Double.parseDouble(opts.getOrDefault("dt2", "0.05"));
-                JvsNExperiment.runSweep(Ns, realizations, k, tf, dt, dt2, baseSeed, out, append);
+                double radialTMin = Double.parseDouble(
+                        opts.getOrDefault("tmin", String.valueOf(tf / 2.0)));
+                JvsNExperiment.runSweep(Ns, realizations, k, tf, dt, dt2, baseSeed, out, append, radialTMin);
             }
             case "animate" -> {
                 int N = Integer.parseInt(opts.getOrDefault("N", "100"));

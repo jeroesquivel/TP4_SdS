@@ -79,7 +79,7 @@ def main():
         out = Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)
     else:
-        out = FIGURES / f"sandbox_11_s2_k_sweep_zoom_M{M}.png"
+        out = FIGURES / "sandbox" / f"ksweep_zoom_M{M}.png"
     fig.savefig(out)
     print("→", out)
 
