@@ -273,7 +273,17 @@
 \end{frame}
 
 % =============================================================================
-% ANIMACIONES (máx. 2)
+% RESULTADOS
+% =============================================================================
+\section{Resultados}
+
+\begin{frame}[plain,c]
+    \centering
+    {\usebeamercolor[fg]{structure}\fontsize{48}{56}\selectfont Resultados\par}
+\end{frame}
+
+% =============================================================================
+% ANIMACIONES
 % =============================================================================
 \begin{frame}{Animación I}
     \begin{columns}[T]
@@ -296,6 +306,28 @@
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
+            % TODO: reemplazar por \simvideo{figures/N=500}{videos/N=500}
+            \begin{tikzpicture}
+                \draw[thick,dashed,gray] (0,0) rectangle (0.62\textheight,0.62\textheight);
+                \node[align=center,gray] at (0.31\textheight,0.31\textheight)
+                    {\Large pendiente de renderizar\\[2pt]\normalsize\texttt{figures/N=500.png}\\\texttt{videos/N=500.mp4}};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Condiciones}
+            \begin{itemize}
+                \item $N = 500$
+                \item $k = 10^{3}$ \si{N/m}
+                \item $\Delta t = \SI{e-3}{s}$
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Animación III}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
             \simvideo{figures/N=1000}{videos/N=1000}
         \end{column}
         \begin{column}{0.32\textwidth}
@@ -307,16 +339,6 @@
             \end{itemize}
         \end{column}
     \end{columns}
-\end{frame}
-
-% =============================================================================
-% RESULTADOS
-% =============================================================================
-\section{Resultados}
-
-\begin{frame}[plain,c]
-    \centering
-    {\usebeamercolor[fg]{structure}\fontsize{48}{56}\selectfont Resultados\par}
 \end{frame}
 
 \begin{frame}{Validación de $\Delta t$ -- evolución de $E_{\text{total}}(t)$}
