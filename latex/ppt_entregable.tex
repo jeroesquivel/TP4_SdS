@@ -47,6 +47,28 @@
   }{#2.mp4}%
 }
 
+% Placeholder para figuras / animaciones faltantes (no rompe compilación).
+% \figorplaceholder{ruta sin ext}{opciones \includegraphics}{nota: qué hacer}
+\newcommand{\missingfig}[2]{%
+  \begin{tikzpicture}
+    \draw[thick,dashed,red!55!black] (0,0) rectangle (0.92\linewidth,0.62\textheight);
+    \node[align=center,red!55!black,text width=0.86\linewidth]
+      at (0.46\linewidth,0.31\textheight)
+      {\textbf{Falta:} #1\\[6pt]\footnotesize\itshape #2};
+  \end{tikzpicture}%
+}
+\newcommand{\figorplaceholder}[3]{%
+  \IfFileExists{#1.png}{\includegraphics[#2]{#1}}{%
+    \missingfig{{\ttfamily\detokenize{#1.png}}}{#3}%
+  }%
+}
+\newcommand{\videoorplaceholder}[3]{%
+  % #1=poster sin ext, #2=video sin ext, #3=nota
+  \IfFileExists{#1.png}{\simvideo{#1}{#2}}{%
+    \missingfig{{\ttfamily\detokenize{#1.png}}\,/\,{\ttfamily\detokenize{#2.mp4}}}{#3}%
+  }%
+}
+
 \newcommand{\vect}[1]{\mathbf{#1}}
 
 \newcommand{\framecite}[1]{%
@@ -248,7 +270,7 @@
             \end{itemize}
             \vspace{0.2cm}
             \textbf{Realizaciones}: $M = 10$ por $(N,k)$.\\
-            \textbf{Ventana estacionaria}: $t \in [t_f/2, t_f]$.
+            \textbf{Ventana de promediado}: $t \in [0, t_f]$.
         \end{column}
     \end{columns}
 \end{frame}
@@ -264,9 +286,9 @@
 \end{frame}
 
 % =============================================================================
-% ANIMACIONES (entregable: frame + link)
+% ANIMACIONES variando N (k = 10^3 fijo)
 % =============================================================================
-\begin{frame}{Animación I}
+\begin{frame}{Animación -- $N = 100$, $k = 10^{3}$ \si{N/m}}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -283,29 +305,7 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{Animación II}
-    \begin{columns}[T]
-        \begin{column}{0.68\textwidth}
-            \centering
-            % TODO: reemplazar por \simvideo{figures/N=500}{videos/N=500}
-            \begin{tikzpicture}
-                \draw[thick,dashed,gray] (0,0) rectangle (0.62\textheight,0.62\textheight);
-                \node[align=center,gray] at (0.31\textheight,0.31\textheight)
-                    {\Large pendiente de renderizar\\[2pt]\normalsize\texttt{figures/N=500.png}\\\texttt{videos/N=500.mp4}};
-            \end{tikzpicture}
-        \end{column}
-        \begin{column}{0.32\textwidth}
-            \textbf{Condiciones}
-            \begin{itemize}
-                \item $N = 500$
-                \item $k = 10^{3}$ \si{N/m}
-                \item $\Delta t = \SI{e-3}{s}$
-            \end{itemize}
-        \end{column}
-    \end{columns}
-\end{frame}
-
-\begin{frame}{Animación III}
+\begin{frame}{Animación -- $N = 1000$, $k = 10^{3}$ \si{N/m}}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -322,28 +322,71 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{Validación de $\Delta t$ -- evolución de $E_{\text{total}}(t)$}
+% =============================================================================
+% Validación de Δt @ k=10³: evolución de E(t) y pendiente Se
+% =============================================================================
+\begin{frame}{Conservación de energía vs.\ $\Delta t$ -- $k = 10^{3}$ \si{N/m}}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
-            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/03a_s2_energy_validation.png}
+            \figorplaceholder{figures/03d_s2_energy_dt_scan}%
+                {width=\linewidth,height=0.70\textheight,keepaspectratio}%
+                {Generada por \texttt{plotter/plot\_s2\_energy\_dt\_scan.py} en
+                \texttt{../figures/}. Copiar a \texttt{latex/figures/} o ajustar
+                \texttt{FIGURES} en \texttt{plotter/\_style.py}. Mostrar sólo
+                el panel de $k=10^{3}$ (single-panel para esta slide).}
         \end{column}
         \begin{column}{0.32\textwidth}
-            \textbf{$E_{\text{total}} = E_{\text{cin}} + E_{\text{pot}}$}
-            \[
-                E_{\text{pot}} = \tfrac{1}{2}k\sum_{\text{contactos}}\xi^2
-            \]
+            \textbf{Métrica}\\[2pt]
+            \resizebox{\linewidth}{!}{$\dfrac{\Delta E_{\text{tot}}(t)}{E_0} = \dfrac{E_{\text{tot}}(t)-E_0}{E_0}$}
             \vspace{0.2cm}
-            \textbf{Criterio}
-            \begin{itemize}
-                \item Deriva relativa $< 1\%$ durante $t_f$.
-                \item Velocity-Verlet conserva $E$ a largo plazo (symplectic).
+
+            \textbf{Observación}
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item Curva por $\Delta t$, gradiente viridis.
+                \item Umbral de deriva: $\pm 1\%$.
+                \item $\Delta t$ chico $\Rightarrow$ deriva acotada.
             \end{itemize}
+            \vspace{0.1cm}
+            \textbf{Parámetros}: $N = 800$, $t_f = \SI{2000}{s}$.
         \end{column}
     \end{columns}
 \end{frame}
 
-\begin{frame}{Tiempo de ejecución vs.\ $N$ (1.1)}
+\begin{frame}{Pendiente $S_e$ del error de energía y $\Delta t$ elegido -- $k = 10^{3}$}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \figorplaceholder{figures/03f_s2_energy_dt_slope}%
+                {width=\linewidth,height=0.70\textheight,keepaspectratio}%
+                {Generada por \texttt{plotter/plot\_s2\_energy\_dt\_scan.py}.
+                Copiar a \texttt{latex/figures/}. Idealmente: versión zoom de
+                la curva $k=10^{3}$ con el $\Delta t$ elegido marcado en línea
+                vertical.}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{$S_e$}\\[2pt]
+            Pendiente lineal de
+            $\Delta E_{\text{tot}}/E_0$ vs.\ $t$ (regresión).
+            \vspace{0.15cm}
+
+            \textbf{Criterio}
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item $|S_e|$ chico $\Rightarrow$ drift acotado.
+                \item Bajar $\Delta t$ baja $|S_e|$ hasta el piso numérico.
+            \end{itemize}
+            \vspace{0.1cm}
+            \textbf{$\Delta t$ elegido} para $k = 10^{3}$:
+            $\Delta t = \SI{2.0e-3}{s}$
+            \framecite{Revisar valor con el plot de $S_e$ -- ver \texttt{PLANPPT.md}}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% =============================================================================
+% 1.1 Tiempo de ejecución -- comparación con TP3
+% =============================================================================
+\begin{frame}{Tiempo de ejecución vs.\ $N$ -- comparación con TP3}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -360,14 +403,17 @@
             \textbf{Observación}
             \begin{itemize}\setlength\itemsep{1pt}
                 \item Log-log: ley de potencia $t_{\text{exec}} \propto N^{\alpha}$.
-                \item DM time-driven $<$ EDMD para $N$ grande.
+                \item DM time-driven vs.\ EDMD del TP3.
             \end{itemize}
         \end{column}
     \end{columns}
-    \framecite{Comparación con TP3 -- mismo $t_f$}
+    \framecite{TP3 propio del grupo -- mismo $t_f$}
 \end{frame}
 
-\begin{frame}{Evolución temporal de $C_{fc}(t)$ (1.2)}
+% =============================================================================
+% 1.2 Cfc y J(N)
+% =============================================================================
+\begin{frame}{Evolución temporal de $C_{fc}(t)$}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -384,7 +430,7 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{Scanning rate $\langle J\rangle$ vs.\ $N$ (1.2)}
+\begin{frame}{Scanning rate $\langle J\rangle$ vs.\ $N$}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -402,14 +448,17 @@
     \framecite{Comparación con TP3 -- $J(N)$ por EDMD}
 \end{frame}
 
-\begin{frame}{Perfiles radiales -- $J_{\text{in}}(S)$ (1.3)}
+% =============================================================================
+% 1.3 Perfiles radiales (como está)
+% =============================================================================
+\begin{frame}{Perfiles radiales -- $J_{\text{in}}(S)$}
     \begin{center}
         \includegraphics[width=0.96\linewidth,height=0.78\textheight,keepaspectratio]{figures/07_s2_radial.png}
     \end{center}
     \framecite{Paleta gradual + colorbar para variable numérica $N$}
 \end{frame}
 
-\begin{frame}{Observables radiales cerca del obstáculo vs.\ $N$ (1.3)}
+\begin{frame}{Observables radiales cerca del obstáculo vs.\ $N$}
     \begin{columns}[T]
         \begin{column}{0.98\textwidth}
             \centering
@@ -419,13 +468,81 @@
     \framecite{Promedio en $S \in [1.5, 5]$ \si{m}; comparación $J_{\text{in}}$ con TP3}
 \end{frame}
 
-\begin{frame}{Barrido en $k$ -- $\langle J\rangle$ y $\langle J_{\text{in}}|_{S\sim 2}\rangle$ vs.\ $N$ (1.4)}
+% =============================================================================
+% ANIMACIONES variando k (N fijo)
+% =============================================================================
+\begin{frame}{Animación -- $k = 10^{2}$ \si{N/m}, $N$ fijo}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \videoorplaceholder{figures/k=100}{videos/k=100}%
+                {Renderizar con \texttt{FrameExporter} (\texttt{Main2 --experiment animate
+                --k 100 --N <N>}) y \texttt{scripts/render\_animations.sh}.
+                Elegir $N$ representativo; ver \texttt{PLANPPT.md}.}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Condiciones}
+            \begin{itemize}
+                \item $k = 10^{2}$ \si{N/m}
+                \item $N = ?$ \framecite{Definir}
+                \item $\Delta t \approx \SI{6.3e-3}{s}$
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Animación -- $k = 10^{4}$ \si{N/m}, $N$ fijo}
+    \begin{columns}[T]
+        \begin{column}{0.68\textwidth}
+            \centering
+            \videoorplaceholder{figures/k=10000}{videos/k=10000}%
+                {Renderizar con \texttt{FrameExporter} (\texttt{Main2 --experiment animate
+                --k 10000 --N <N>}) y \texttt{scripts/render\_animations.sh}.
+                Mismo $N$ que la slide anterior para comparar.}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \textbf{Condiciones}
+            \begin{itemize}
+                \item $k = 10^{4}$ \si{N/m}
+                \item $N = ?$ \framecite{Definir}
+                \item $\Delta t \approx \SI{6.3e-4}{s}$
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% =============================================================================
+% 1.4 Variación de k
+% =============================================================================
+\begin{frame}{$\Delta t$ elegido por $k$}
+    \centering
+    \vspace{0.3cm}
+    \begin{tabular}{c c c}
+        \hline
+        $k$ \si{[N/m]} & $\tau_{\text{col}} = 2\pi\sqrt{m/k}$ & $\Delta t$ elegido \\
+        \hline
+        $10^{2}$  & $\approx \SI{0.63}{s}$  & $\approx \SI{6.3e-3}{s}$ \\
+        $10^{3}$  & $\approx \SI{0.20}{s}$  & $\approx \SI{2.0e-3}{s}$ \\
+        $10^{4}$  & $\approx \SI{0.063}{s}$ & $\approx \SI{6.3e-4}{s}$ \\
+        \hline
+    \end{tabular}
+
+    \vspace{0.5cm}
+    \begin{itemize}\setlength\itemsep{2pt}
+        \item Criterio: $\Delta t \approx \tau_{\text{col}}/100$.
+        \item Validado contra $|S_e|$ y deriva acumulada de $E(t)$ ($< 1\%$).
+        \item $\Delta t_2 = \SI{0.05}{s}$ común para muestreo (independiente de $\Delta t$).
+    \end{itemize}
+    \framecite{Valores a refinar con el análisis de $S_e$ -- ver \texttt{PLANPPT.md}}
+\end{frame}
+
+\begin{frame}{Scanning rate $\langle J\rangle$ y flujo $\langle J_{\text{in}}|_{S\sim 2}\rangle$ vs.\ $N$ -- barrido en $k$}
     \begin{center}
         \includegraphics[width=0.96\linewidth,height=0.78\textheight,keepaspectratio]{figures/09_s2_k_sweep.png}
     \end{center}
 \end{frame}
 
-\begin{frame}{Escalar característico vs.\ $k$ (1.4)}
+\begin{frame}{Escalar característico vs.\ $k$}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering

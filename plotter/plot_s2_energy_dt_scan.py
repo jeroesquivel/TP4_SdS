@@ -117,6 +117,38 @@ def main():
     fig.savefig(out)
     print("→", out)
 
+    # =========== Fig 1b: single-panel k = 10^3 ===========
+    K_FOCUS = 1000.0
+    k_match = next((k for k in ks if np.isclose(k, K_FOCUS)), None)
+    if k_match is not None:
+        figk, axk = plt.subplots(figsize=(8.4, 5.0), constrained_layout=True)
+        t_max_k = 0.0
+        for dt, f in by_k[k_match]:
+            df = pd.read_csv(f)
+            e0 = df["e_total"].iloc[0]
+            rel = (df["e_total"] - e0) / e0
+            axk.plot(df["t"], rel, color=cmap(norm(dt)), lw=1.6, alpha=0.95)
+            t_max_k = max(t_max_k, df["t"].max())
+        axk.axhline(+DRIFT_TOL, color="0.35", lw=0.9, ls=":", alpha=0.75)
+        axk.axhline(-DRIFT_TOL, color="0.35", lw=0.9, ls=":", alpha=0.75)
+        axk.axhline(0.0, color="black", lw=0.7, alpha=0.4)
+        axk.set_xlabel("t [s]")
+        axk.set_ylabel(r"$\Delta E_{tot}/E_0$")
+        axk.set_xlim(-100, t_max_k if t_max_k > 0 else 5.0)
+        axk.set_ylim(-0.01, 0.2)
+        axk.set_title(rf"Conservación de energía vs. $\Delta t$  —  k = {k_label(k_match)} N/m,  N=800,  $t_f$=2000 s")
+        smk = ScalarMappable(norm=norm, cmap=cmap); smk.set_array([])
+        cbk = figk.colorbar(smk, ax=axk, fraction=0.040, pad=0.018)
+        cbk.set_label(r"$\Delta t$  [s]")
+        cbk.set_ticks(all_dts)
+        cbk.set_ticklabels([f"{dt:.0e}" for dt in all_dts])
+        cbk.ax.minorticks_off()
+        out_k = FIGURES / "03d_s2_energy_dt_scan_k1e3.png"
+        figk.savefig(out_k)
+        print("→", out_k)
+    else:
+        print(f"[warn] no hay corridas con k={K_FOCUS:g}; salteo 03d single-k")
+
     # =========== Fig 2: max|ΔE/E_0| vs Δt, una curva por k ===========
     md = pd.DataFrame(max_drift_rows).sort_values(["k", "dt"])
 
@@ -170,6 +202,25 @@ def main():
     out3 = FIGURES / "03f_s2_energy_dt_slope.png"
     fig3.savefig(out3)
     print("→", out3)
+
+    # =========== Fig 3b: |Se| vs Δt, solo k = 10^3 ===========
+    if k_match is not None:
+        sub = md[md["k"] == k_match].sort_values("dt")
+        y = sub["slope"].abs().replace([np.inf, -np.inf], np.nan)
+        fig3k, ax3k = plt.subplots(figsize=(8.4, 5.0))
+        ax3k.loglog(sub["dt"], y, "o-",
+                    color=cmap_k(norm_k(k_match)), lw=1.8, markersize=7,
+                    markerfacecolor="white", markeredgewidth=1.5,
+                    label=f"k = {k_label(k_match)} N/m")
+        ax3k.set_xlabel(r"$\Delta t$  [s]")
+        ax3k.set_ylabel(r"$|S_e|$  [s$^{-1}$]")
+        ax3k.set_title(rf"Pendiente del error $S_e$ vs. $\Delta t$  —  k = {k_label(k_match)} N/m,  N=800,  $t_f$=2000 s")
+        ax3k.legend(loc="upper left", frameon=True, framealpha=0.95, handlelength=2.2)
+        out3k = FIGURES / "03f_s2_energy_dt_slope_k1e3.png"
+        fig3k.savefig(out3k)
+        print("→", out3k)
+    else:
+        print(f"[warn] no hay corridas con k={K_FOCUS:g}; salteo 03f single-k")
 
 
 if __name__ == "__main__":
