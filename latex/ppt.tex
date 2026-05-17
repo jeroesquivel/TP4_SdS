@@ -189,45 +189,44 @@
 % --- Introducción ------------------------------------------------------------
 \sectiondivider{Introducción}
 
-\begin{frame}{Sistema real y modelo matemático}
-    \begin{columns}[T]
-        \begin{column}{0.56\textwidth}
-            \textbf{Sistema real}
-            \begin{itemize}\setlength\itemsep{2pt}
-                \item Partículas en un recinto cerrado que rebotan
-                      contra un obstáculo fijo central.
-                \item A diferencia del esquema event-driven (TP3, choques
-                      instantáneos), se modela el \emph{contacto} con una
-                      fuerza elástica blanda.
-            \end{itemize}
+\begin{frame}{Sistema real y motivación}
+        \begin{itemize}
+            \item Sistemas físicos modelables como partículas con interacciones por colisión: gases diluidos, granos, partículas brownianas.
+            \item Sistema real simulado: glóblulos blancos del sistema inmunológico
+        \end{itemize}
+    \end{frame}
 
-            \vspace{0.2cm}
-            \textbf{Ecuaciones del modelo}
-            \begin{itemize}\setlength\itemsep{2pt}
-                \item Movimiento de Newton:
-                      $m_i\,\dot{\vect{v}}_i = \sum_j \vect{F}_{ij}$.
-                \item Fuerza de contacto a pares:
-                      \[
-                          \vect{F}_{ij} = -k\,\xi\,\hat{\vect{e}}_{ij},
-                          \quad
-                          \xi = r_i + r_j - |\vect{x}_i - \vect{x}_j|,
-                      \]
-                      activa sólo si $\xi > 0$.
-                \item Energía total $E_{\text{tot}} = E_{\text{kin}} + E_{\text{pot}}$
-                      debe conservarse (validación del $\Delta t$).
-            \end{itemize}
-        \end{column}
-        \begin{column}{0.44\textwidth}
-            \centering
-            \begin{tikzpicture}[scale=1.0]
-                \draw[thick] (0,0) circle (2.4);
-                \fill[violet!70!black] (0,0) circle (0.22);
-                \foreach \x/\y in {1.0/0.4, -1.2/0.6, 0.2/-1.5, 1.5/-1.0, -0.8/-1.7, -1.6/-0.3}
-                \fill[green!60!black] (\x,\y) circle (0.10);
-                \foreach \x/\y in {-0.4/1.3, 1.8/0.2}
-                \fill[violet!70!black] (\x,\y) circle (0.10);
-            \end{tikzpicture}\\[6pt]
-            {\footnotesize Fuerza activa cuando dos partículas (o partícula--obstáculo, partícula--borde) se solapan.}
+\begin{frame}{Modelo matemático}
+    \begin{columns}[T]
+        \begin{column}{0.95\textwidth}
+            \textbf{Ecuaciones de movimiento (Newton)}
+            \[
+                m_i\,\ddot{\vect{r}}_i \;=\; \vect{F}_i^{\,Tot} \;=\; \sum_{j \neq i} \vect{F}_{ij}
+            \]
+
+            \vspace{0.4em}
+            \textbf{Interacción de a pares (elástica, de corto alcance)}
+            \[
+                \vect{F}_{ij} =
+                \begin{cases}
+                    k\,\xi_{ij}\,\vect{e}_{ij} & \text{si } \xi_{ij} > 0 \\[2pt]
+                    \vect{0} & \text{si } \xi_{ij} \leq 0
+                \end{cases}
+            \]
+
+            \vspace{0.2em}
+            con la superposición y el versor normal definidos como
+            \[
+                \xi_{ij} = (r_i + r_j) - |\vect{x}_i - \vect{x}_j|,
+                \qquad
+                \vect{e}_{ij} = \frac{\vect{x}_i - \vect{x}_j}{|\vect{x}_i - \vect{x}_j|}.
+            \]
+
+            \vspace{0.3em}
+            \footnotesize
+            La fuerza actúa únicamente durante el contacto ($\xi_{ij} > 0$),
+            es decir, los choques tienen duración finita y se resuelven a lo largo
+            de varios pasos temporales.
         \end{column}
     \end{columns}
 \end{frame}
