@@ -261,7 +261,6 @@
                 \item $N$ partículas; $r = \SI{1}{m}$, $m = \SI{1}{kg}$.
                 \item $|\vect{v}_0| = \SI{1}{m/s}$, dirección uniforme $\in [0,2\pi)$.
                 \item Distribución inicial uniforme, sin solapamiento.
-                \item Obstáculo y borde: misma ley de fuerza, masa infinita.
                 \item Estados:
                 \begin{itemize}
                     \item \textcolor{green!55!black}{\textbf{Fresca}}: al tocar el obstáculo $\rightarrow$ usada.
@@ -285,6 +284,28 @@
     \end{columns}
 \end{frame}
 
+\begin{frame}{Parámetros y realizaciones}
+    \begin{columns}[T]
+        \begin{column}{0.50\textwidth}
+            \textbf{Parámetros variables}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item $N \in [100, 1000]$ con pasos de $100$.
+                \item $k \in \{10^1, 10^5\}$ \si{N/m}.
+                \item $k_{\text{ref}} = 10^3$ \si{N/m}.
+            \end{itemize}
+            \vspace{0.2cm}
+            \textbf{Parámetros fijos}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item $t_f = \SI{500}{s}$.
+                \item $\Delta t_2 = \SI{0.05}{s}$ (muestreo de perfiles).
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.50\textwidth}
+            \textbf{Realizaciones}: $M = 10$ por $(N,k)$.\\
+        \end{column}
+    \end{columns}
+\end{frame}
+
 \begin{frame}{Observables (1/2) -- scanning rate}
     \textbf{Cambio de estado:} con $C_{fc}(t)$ el contador acumulado de
     transiciones fresca$\to$usada en $[0, t]$,
@@ -296,17 +317,7 @@
 
     \vspace{0.3cm}
     \textbf{Scanning rate} $J$: pendiente de $C_{fc}(t)$ en la ventana de régimen
-    estacionario $[t_a, t_b] = [0, t_f]$, estimada por mínimos cuadrados
-    $\bigl(\hat\beta_0, \hat\beta_1\bigr) = \arg\min \sum_n (C_{fc}(t_n) - \beta_0 - \beta_1 t_n)^2$.
-    \[
-        J^{(k)} = \hat\beta_1^{(k)}
-        \quad\text{(realización } k\text{)},\qquad
-        \langle J\rangle = \frac{1}{M}\sum_{k=1}^{M} J^{(k)},
-        \qquad
-        \sigma_J = \sqrt{\frac{1}{M-1}\sum_{k=1}^{M}(J^{(k)}-\langle J\rangle)^2}
-    \]
-    \vspace{-0.2cm}
-    {\footnotesize $M = 10$ realizaciones por $(N, k)$.}
+    estacionario. Calculado por ajuste lineal.
 \end{frame}
 
 \begin{frame}{Observables (2/2) -- perfiles radiales}
@@ -333,36 +344,6 @@
     {\footnotesize $T$: snapshots promediados ($t_f/\Delta t_2 = 10^4$). \quad
                    $T'$: subconjunto de snapshots con $n_k^{\,\text{in}}(S,t) > 0$
                    (los snapshots con capa vacía se omiten del promedio de $v$).}
-\end{frame}
-
-\begin{frame}{Parámetros y realizaciones}
-    \begin{columns}[T]
-        \begin{column}{0.50\textwidth}
-            \textbf{Parámetros variables}
-            \begin{itemize}\setlength\itemsep{2pt}
-                \item $N \in [100, 1000]$ (paso 100, refinado a paso 50 en $[300, 600]$).
-                \item $k \in \{10^2, 10^3, 1.5\!\cdot\!10^3, 5\!\cdot\!10^3, 10^4\}$ \si{N/m}.
-                \item $k_{\text{ref}} = 10^3$ \si{N/m}.
-            \end{itemize}
-            \vspace{0.2cm}
-            \textbf{Parámetros fijos}
-            \begin{itemize}\setlength\itemsep{2pt}
-                \item $t_f = \SI{500}{s}$.
-                \item $\Delta t_2 = \SI{0.05}{s}$ (muestreo de perfiles).
-            \end{itemize}
-        \end{column}
-        \begin{column}{0.50\textwidth}
-            \textbf{$\Delta t$ por $k$} (empírico, validado con $E(t)$)
-            \begin{itemize}\setlength\itemsep{1pt}
-                \item $k = 10^2$: $\Delta t = \SI{e-2}{s}$.
-                \item $k = 10^3$: $\Delta t = \SI{e-3}{s}$.
-                \item $k = 10^4$: $\Delta t = \SI{e-3}{s}$.
-            \end{itemize}
-            \vspace{0.2cm}
-            \textbf{Realizaciones}: $M = 10$ por $(N,k)$.\\
-            \textbf{Ventana de promediado}: $t \in [0, t_f]$.
-        \end{column}
-    \end{columns}
 \end{frame}
 
 % =============================================================================
@@ -513,8 +494,6 @@
             \textbf{Observación}
             \begin{itemize}\setlength\itemsep{1pt}
                 \item Régimen estacionario desde $t \approx 0$.
-                \item Pendiente lineal $\Rightarrow J(N)$ por ajuste.
-                \item Sólo el primer $\Delta t$ de cada contacto cuenta.
             \end{itemize}
         \end{column}
     \end{columns}
