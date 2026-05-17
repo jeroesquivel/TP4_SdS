@@ -9,16 +9,17 @@ def main():
     df = df[df["N"] % 100 == 0]
     fig, ax = plt.subplots(figsize=(8.4, 5.2))
 
-    # TP4 — el ajuste se sigue haciendo en log-log para extraer el exponente,
-    # pero el plot va en x lineal, y log (escalado uniforme en N).
+    # TP4 — log-log para mostrar la ley de potencia: lineal en log-log ⇒
+    # t_exec ∝ N^α (corrección TP3 D23: "lineal en log-log = ley de potencia,
+    # no exponencial").
     slope, intercept = np.polyfit(np.log10(df["N"]), np.log10(df["t_exec_s"]), 1)
     label_tp4 = f"TP4 (DM, Velocity-Verlet)   m = {slope:.2f}"
-    ax.semilogy(df["N"], df["t_exec_s"], "o-", color="#1f77b4", lw=2.0,
+    ax.loglog(df["N"], df["t_exec_s"], "o-", color="#1f77b4", lw=2.0,
                 markersize=9, markerfacecolor="white", markeredgewidth=1.8,
                 label=label_tp4)
 
     n_span = np.array([df["N"].min(), df["N"].max()])
-    ax.semilogy(n_span, 10 ** (slope * np.log10(n_span) + intercept),
+    ax.loglog(n_span, 10 ** (slope * np.log10(n_span) + intercept),
                 ":", color="#1f77b4", lw=1.2, alpha=0.6)
 
     # TP3
@@ -30,7 +31,7 @@ def main():
             label_tp3 = f"TP3 (EDMD)   m = {slope3:.2f}"
         else:
             label_tp3 = "TP3 (EDMD)"
-        ax.semilogy(d3["N"], d3["t_exec"], "s--", color="#d62728", lw=1.6,
+        ax.loglog(d3["N"], d3["t_exec"], "s--", color="#d62728", lw=1.6,
                     markersize=9, markerfacecolor="white", markeredgewidth=1.8,
                     label=label_tp3)
 

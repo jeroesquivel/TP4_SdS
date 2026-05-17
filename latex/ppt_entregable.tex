@@ -4,7 +4,7 @@
 %  Dinámica Molecular regida por el paso temporal
 %
 %  Versión ENTREGABLE (PDF): frame estático + link a YouTube/Vimeo
-%  en lugar de animaciones embebidas. Resto idéntico a ppt.tex.
+%  en lugar de animaciones embebidas. Estructura idéntica a ppt.tex.
 % =============================================================================
 
 \documentclass[10pt,aspectratio=169]{beamer}
@@ -31,24 +31,27 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
 \usepackage{hyperref}
-% Animaciones embebidas como mp4 (paquete multimedia, macro \movie).
-% Los mp4 se generan automáticamente con `scripts/render_animations.sh`
-% (Java → PNG → ffmpeg → H.264). Funciona con Adobe Acrobat (Reader/Pro)
-% y con pympress; el poster estático se ve en cualquier visor.
-\usepackage{multimedia}
 
-\newlength{\vidW}
+% Links de YouTube/Vimeo a las animaciones. Editar cuando estén subidos.
+% Si está vacío, la slide muestra "[link pendiente]" en lugar del URL.
+\newcommand{\videolinkNcien}{}        % N = 100,  k = 10^3
+\newcommand{\videolinkNmil}{}         % N = 1000, k = 10^3
+\newcommand{\videolinkKcien}{}        % k = 10^2
+\newcommand{\videolinkKdiezmil}{}     % k = 10^4
+
+% \simvideo{poster sin ext}{link YouTube/Vimeo (puede ser vacío)}
+% Versión entregable: muestra solo el frame y el link debajo.
 \newlength{\vidH}
+\setlength{\vidH}{0.62\textheight}
 \newcommand{\simvideo}[2]{%
-  \setlength{\vidH}{0.62\textheight}%
-  \setlength{\vidW}{\vidH}% animaciones cuadradas (480x480)
-  \movie[autostart,loop,width=\vidW,height=\vidH,poster]{%
-    \includegraphics[width=\vidW,height=\vidH]{#1.png}%
-  }{#2.mp4}%
+  \begin{minipage}{\linewidth}\centering
+    \includegraphics[height=\vidH,keepaspectratio]{#1.png}\\[4pt]
+    {\footnotesize\ttfamily
+      \ifx&#2&\textcolor{red!60!black}{[link pendiente]}%
+      \else \url{#2}\fi}%
+  \end{minipage}%
 }
 
-% Placeholder para figuras / animaciones faltantes (no rompe compilación).
-% \figorplaceholder{ruta sin ext}{opciones \includegraphics}{nota: qué hacer}
 \newcommand{\missingfig}[2]{%
   \begin{tikzpicture}
     \draw[thick,dashed,red!55!black] (0,0) rectangle (0.92\linewidth,0.62\textheight);
@@ -63,9 +66,8 @@
   }%
 }
 \newcommand{\videoorplaceholder}[3]{%
-  % #1=poster sin ext, #2=video sin ext, #3=nota
   \IfFileExists{#1.png}{\simvideo{#1}{#2}}{%
-    \missingfig{{\ttfamily\detokenize{#1.png}}\,/\,{\ttfamily\detokenize{#2.mp4}}}{#3}%
+    \missingfig{{\ttfamily\detokenize{#1.png}}}{#3}%
   }%
 }
 
@@ -76,6 +78,13 @@
     \node[anchor=south west,font=\tiny,text=black!60]
       at ([xshift=6pt,yshift=4pt]current page.south west) {#1};
   \end{tikzpicture}}
+
+\newcommand{\sectiondivider}[1]{%
+  \begin{frame}[plain,c]
+    \centering
+    {\usebeamercolor[fg]{structure}\fontsize{42}{50}\selectfont #1\par}
+  \end{frame}%
+}
 
 \title[TP4 -- DM paso temporal]{Dinámica Molecular regida por el paso temporal}
 \subtitle{Trabajo Práctico N\textsuperscript{o} 4}
@@ -94,7 +103,7 @@
 }
 
 % =============================================================================
-% SISTEMA 1 -- solo resultados, ~2 slides, < 1 min
+% SISTEMA 1
 % =============================================================================
 \section{Sistema 1}
 
@@ -168,6 +177,82 @@
     {\large DM regida por paso temporal con fuerza elástica blanda}
 \end{frame}
 
+% --- Introducción ------------------------------------------------------------
+\sectiondivider{Introducción}
+
+\begin{frame}{Sistema real y modelo matemático}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \textbf{Sistema real}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item Partículas en un recinto cerrado que rebotan
+                      contra un obstáculo fijo central.
+                \item A diferencia del esquema event-driven (TP3, choques
+                      instantáneos), se modela el \emph{contacto} con una
+                      fuerza elástica blanda.
+            \end{itemize}
+
+            \vspace{0.2cm}
+            \textbf{Ecuaciones del modelo}
+            \begin{itemize}\setlength\itemsep{2pt}
+                \item Movimiento de Newton:
+                      $m_i\,\dot{\vect{v}}_i = \sum_j \vect{F}_{ij}$.
+                \item Fuerza de contacto a pares:
+                      \[
+                          \vect{F}_{ij} = -k\,\xi\,\hat{\vect{e}}_{ij},
+                          \quad
+                          \xi = r_i + r_j - |\vect{x}_i - \vect{x}_j|,
+                      \]
+                      activa sólo si $\xi > 0$.
+                \item Energía total $E_{\text{tot}} = E_{\text{kin}} + E_{\text{pot}}$
+                      debe conservarse (validación del $\Delta t$).
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.44\textwidth}
+            \centering
+            \begin{tikzpicture}[scale=1.0]
+                \draw[thick] (0,0) circle (2.4);
+                \fill[violet!70!black] (0,0) circle (0.22);
+                \foreach \x/\y in {1.0/0.4, -1.2/0.6, 0.2/-1.5, 1.5/-1.0, -0.8/-1.7, -1.6/-0.3}
+                \fill[green!60!black] (\x,\y) circle (0.10);
+                \foreach \x/\y in {-0.4/1.3, 1.8/0.2}
+                \fill[violet!70!black] (\x,\y) circle (0.10);
+            \end{tikzpicture}\\[6pt]
+            {\footnotesize Fuerza activa cuando dos partículas (o partícula--obstáculo, partícula--borde) se solapan.}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- Implementación ----------------------------------------------------------
+\sectiondivider{Implementación}
+
+\begin{frame}{Motor de simulación}
+    \begin{enumerate}\setlength\itemsep{3pt}
+        \item Sembrar $N$ partículas por rejection sampling: posiciones sin
+              solapamiento, $|\vect{v}| = v_0$ con ángulo uniforme en $[0, 2\pi)$.
+        \item Indexar en \emph{Cell Index Method} (celda $= 2\,r_{\max}$):
+              vecinos en $\mathcal{O}(1)$ por partícula.
+        \item \textbf{Mientras} $t < t_f$:
+        \begin{enumerate}\setlength\itemsep{1pt}
+            \item Calcular fuerzas: pares en contacto ($\xi>0$),
+                  obstáculo, borde. \hfill $\mathcal{O}(N)$
+            \item Integrar un paso $\Delta t$ con Velocity-Verlet 2D.
+                  \hfill $\mathcal{O}(N)$
+            \item Detectar flancos de contacto y actualizar el estado
+                  fresca\,/\,usada de cada partícula.
+            \item Acumular $C_{fc}(t)$ con resolución $\Delta t$;
+                  muestrear estado cada $\Delta t_2$ para los perfiles
+                  radiales.
+        \end{enumerate}
+    \end{enumerate}
+    \vspace{0.2cm}
+    \textbf{Integrador}: Velocity-Verlet 2D (simpléctico, $\vect{F} = \vect{F}(\vect{x})$).
+    \framecite{Teórica 4 -- slide 17}
+\end{frame}
+
+% --- Simulaciones ------------------------------------------------------------
+\sectiondivider{Simulaciones}
+
 \begin{frame}{Sistema particular}
     \begin{columns}[T]
         \begin{column}{0.55\textwidth}
@@ -177,16 +262,11 @@
                 \item $N$ partículas; $r = \SI{1}{m}$, $m = \SI{1}{kg}$.
                 \item $|\vect{v}_0| = \SI{1}{m/s}$, dirección uniforme $\in [0,2\pi)$.
                 \item Distribución inicial uniforme, sin solapamiento.
-                \item Fuerza elástica blanda de a pares:
-                \begin{itemize}
-                    \item $\vect{F}_{ij} = -k\,\xi\,\hat{\vect{e}}_{ij}$ si $\xi > 0$.
-                    \item $\xi = r_i + r_j - |\vect{x}_i - \vect{x}_j|$.
-                \end{itemize}
-                \item Obstáculo y borde: masa infinita, misma forma.
+                \item Obstáculo y borde: misma ley de fuerza, masa infinita.
                 \item Estados:
                 \begin{itemize}
-                    \item \textcolor{green!55!black}{\textbf{Fresca}}: toca obstáculo $\rightarrow$ usada.
-                    \item \textcolor{violet!70!black}{\textbf{Usada}}: toca borde $\rightarrow$ fresca.
+                    \item \textcolor{green!55!black}{\textbf{Fresca}}: al tocar el obstáculo $\rightarrow$ usada.
+                    \item \textcolor{violet!70!black}{\textbf{Usada}}: al tocar el borde $\rightarrow$ fresca.
                 \end{itemize}
             \end{itemize}
         \end{column}
@@ -200,73 +280,84 @@
                 \foreach \x/\y in {-0.5/1.6, 2.2/0.3, -1.8/1.8}
                 \fill[violet!70!black] (\x,\y) circle (0.12);
                 \draw[<->] (-3,-3.4) -- (3,-3.4) node[midway,below,font=\small]{$L$};
-                \node[font=\scriptsize] at (0.5,0.15) {$r_0$};
+                \node[font=\scriptsize,anchor=west] at (0.32,0.0) {$r_0$};
             \end{tikzpicture}
         \end{column}
     \end{columns}
 \end{frame}
 
-\begin{frame}{Motor de simulación}
-    \begin{enumerate}\setlength\itemsep{2pt}
-        \item Sembrar $N$ partículas (rejection sampling): posiciones sin solapamiento; $|\vect{v}| = v_0$, ángulo uniforme.
-        \item Indexar en \emph{Cell Index Method} (celda $= 2r$): vecinos en $\mathcal{O}(1)$.
-        \item \textbf{Mientras} $t < t_f$:
-        \begin{enumerate}\setlength\itemsep{1pt}
-            \item Calcular fuerzas: pares en contacto ($\xi>0$), obstáculo, borde. \hfill $\mathcal{O}(N)$
-            \item Integrar Velocity-Verlet 2D un paso $\Delta t$. \hfill $\mathcal{O}(N)$
-            \item Actualizar flags de contacto y estado (fresca/usada).
-            \item Muestrear cada $\Delta t_2$ para perfiles; $C_{fc}$ con resolución $\Delta t$.
-        \end{enumerate}
-    \end{enumerate}
-    \vspace{0.3cm}
-    \textbf{Integrador:} Velocity-Verlet 2D (symplectic, $\vect{F}(\vect{x})$ sin dependencia en $\vect{v}$).
-    \framecite{Teórica 4, slide 17}
-\end{frame}
-
-\begin{frame}{Observables}
-    \textbf{Cambio de estado:}
+\begin{frame}{Observables (1/2) -- scanning rate}
+    \textbf{Cambio de estado:} con $C_{fc}(t)$ el contador acumulado de
+    transiciones fresca$\to$usada en $[0, t]$,
     \[
-        C_{fc}(t) = \#\{\text{transiciones fresca}\to\text{usada en }[0,t]\},
-        \qquad
-        J = \left.\frac{\mathrm{d}\,C_{fc}}{\mathrm{d}t}\right|_{\text{estac.}}
+        C_{fc}(t) = \sum_{n=1}^{\lfloor t/\Delta t\rfloor}
+                    \#\{\text{transiciones fresca}\to\text{usada en el paso } n\}.
     \]
-    \vspace{-0.1cm}
     Sólo se cuenta el \textbf{primer $\Delta t$} de cada contacto con el obstáculo.
 
     \vspace{0.3cm}
-    \textbf{Perfiles radiales} (capas $\mathrm{d}S = \SI{0.2}{m}$; partículas frescas con $\vect{x}_j\!\cdot\!\vect{v}_j < 0$):
+    \textbf{Scanning rate} $J$: pendiente de $C_{fc}(t)$ en la ventana de régimen
+    estacionario $[t_a, t_b] = [0, t_f]$, estimada por mínimos cuadrados
+    $\bigl(\hat\beta_0, \hat\beta_1\bigr) = \arg\min \sum_n (C_{fc}(t_n) - \beta_0 - \beta_1 t_n)^2$.
     \[
-        \langle\rho_f^{\,\text{in}}\rangle(S) = \frac{1}{M\,T}\sum_{k,t}\frac{n_k^{\,\text{in}}(S,t)}{A(S)},
-        \quad
-        |\langle v_f^{\,\text{in}}\rangle(S)| = \left|\frac{1}{M\,T}\sum_{k,t}\frac{1}{n_k^{\,\text{in}}}\!\!\sum_{j\in P_f^{\,\text{in}}}\!\!\tfrac{\vect{x}_j\!\cdot\!\vect{v}_j}{|\vect{x}_j|}\right|
+        J^{(k)} = \hat\beta_1^{(k)}
+        \quad\text{(realización } k\text{)},\qquad
+        \langle J\rangle = \frac{1}{M}\sum_{k=1}^{M} J^{(k)},
+        \qquad
+        \sigma_J = \sqrt{\frac{1}{M-1}\sum_{k=1}^{M}(J^{(k)}-\langle J\rangle)^2}
     \]
-    \[
-        J_{\text{in}}(S) = \langle\rho_f^{\,\text{in}}\rangle(S)\,|\langle v_f^{\,\text{in}}\rangle(S)|
-    \]
+    \vspace{-0.2cm}
+    {\footnotesize $M = 10$ realizaciones por $(N, k)$.}
 \end{frame}
 
-\begin{frame}{Parámetros de simulación y realizaciones}
+\begin{frame}{Observables (2/2) -- perfiles radiales}
+    Capas concéntricas de ancho $\mathrm{d}S = \SI{0.2}{m}$; en cada snapshot,
+    $P_f^{\,\text{in}}(S, t)$: partículas \emph{frescas} con velocidad radial
+    entrante, $\vect{x}_j\!\cdot\!\vect{v}_j < 0$, en la capa $S$.
+    $n_k^{\,\text{in}}(S, t) = |P_f^{\,\text{in}}(S,t)|$ en la realización $k$.
+    \[
+        \langle\rho_f^{\,\text{in}}\rangle(S)
+          = \frac{1}{M\,T}\sum_{k=1}^{M}\sum_{t}\frac{n_k^{\,\text{in}}(S,t)}{A(S)},
+        \qquad
+        A(S) = 2\pi S\,\mathrm{d}S
+    \]
+    \[
+        |\langle v_f^{\,\text{in}}\rangle(S)|
+          = \left|\frac{1}{M\,T'}\!\!
+                  \sum_{\substack{k,t\\ n_k^{\,\text{in}}>0}}
+                  \frac{1}{n_k^{\,\text{in}}}
+                  \!\!\sum_{j\in P_f^{\,\text{in}}}\!\!\tfrac{\vect{x}_j\!\cdot\!\vect{v}_j}{|\vect{x}_j|}\right|,
+        \qquad
+        J^{\,\text{in}}(S) = \langle\rho_f^{\,\text{in}}\rangle(S)\,
+                             |\langle v_f^{\,\text{in}}\rangle(S)|
+    \]
+    {\footnotesize $T$: snapshots promediados ($t_f/\Delta t_2 = 10^4$). \quad
+                   $T'$: subconjunto de snapshots con $n_k^{\,\text{in}}(S,t) > 0$
+                   (los snapshots con capa vacía se omiten del promedio de $v$).}
+\end{frame}
+
+\begin{frame}{Parámetros y realizaciones}
     \begin{columns}[T]
-        \begin{column}{0.5\textwidth}
+        \begin{column}{0.50\textwidth}
             \textbf{Parámetros variables}
             \begin{itemize}\setlength\itemsep{2pt}
-                \item $N \in [100, 1000]$.
-                \item $k \in \{10^2, 10^3, 10^4\}$ \si{N/m}.
+                \item $N \in [100, 1000]$ (paso 100, refinado a paso 50 en $[300, 600]$).
+                \item $k \in \{10^2, 10^3, 1.5\!\cdot\!10^3, 5\!\cdot\!10^3, 10^4\}$ \si{N/m}.
                 \item $k_{\text{ref}} = 10^3$ \si{N/m}.
             \end{itemize}
             \vspace{0.2cm}
             \textbf{Parámetros fijos}
             \begin{itemize}\setlength\itemsep{2pt}
                 \item $t_f = \SI{500}{s}$.
-                \item $\Delta t_2 = \SI{0.05}{s}$ (muestreo).
+                \item $\Delta t_2 = \SI{0.05}{s}$ (muestreo de perfiles).
             \end{itemize}
         \end{column}
-        \begin{column}{0.5\textwidth}
-            \textbf{$\Delta t$ por $k$} (validado con $E(t)$)
+        \begin{column}{0.50\textwidth}
+            \textbf{$\Delta t$ por $k$} (empírico, validado con $E(t)$)
             \begin{itemize}\setlength\itemsep{1pt}
-                \item $k = 10^2$: $\Delta t \approx \SI{6.3e-3}{s}$.
-                \item $k = 10^3$: $\Delta t \approx \SI{2.0e-3}{s}$.
-                \item $k = 10^4$: $\Delta t \approx \SI{6.3e-4}{s}$.
+                \item $k = 10^2$: $\Delta t = \SI{e-2}{s}$.
+                \item $k = 10^3$: $\Delta t = \SI{e-3}{s}$.
+                \item $k = 10^4$: $\Delta t = \SI{e-3}{s}$.
             \end{itemize}
             \vspace{0.2cm}
             \textbf{Realizaciones}: $M = 10$ por $(N,k)$.\\
@@ -292,7 +383,7 @@
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
-            \simvideo{figures/N=100}{videos/N=100}
+            \simvideo{figures/N=100}{\videolinkNcien}
         \end{column}
         \begin{column}{0.32\textwidth}
             \textbf{Condiciones}
@@ -309,7 +400,7 @@
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
-            \simvideo{figures/N=1000}{videos/N=1000}
+            \simvideo{figures/N=1000}{\videolinkNmil}
         \end{column}
         \begin{column}{0.32\textwidth}
             \textbf{Condiciones}
@@ -475,7 +566,7 @@
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
-            \videoorplaceholder{figures/k=100}{videos/k=100}%
+            \videoorplaceholder{figures/k=100}{\videolinkKcien}%
                 {Renderizar con \texttt{FrameExporter} (\texttt{Main2 --experiment animate
                 --k 100 --N <N>}) y \texttt{scripts/render\_animations.sh}.
                 Elegir $N$ representativo; ver \texttt{PLANPPT.md}.}
@@ -495,7 +586,7 @@
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
-            \videoorplaceholder{figures/k=10000}{videos/k=10000}%
+            \videoorplaceholder{figures/k=10000}{\videolinkKdiezmil}%
                 {Renderizar con \texttt{FrameExporter} (\texttt{Main2 --experiment animate
                 --k 10000 --N <N>}) y \texttt{scripts/render\_animations.sh}.
                 Mismo $N$ que la slide anterior para comparar.}
