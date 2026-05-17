@@ -518,12 +518,11 @@
             \textbf{Observación}
             \begin{itemize}\setlength\itemsep{1pt}
                 \item Crece y satura con $N$.
-                \item Barras de error: desvío sobre $M = 10$ realizaciones.
-                \item Comparable a $J(N)$ del TP3 en orden de magnitud.
+                \item Máximo en $N \approx 500$.
+                \item Similar a $J(N)$ del TP3.
             \end{itemize}
         \end{column}
     \end{columns}
-    \framecite{Comparación con TP3 -- $J(N)$ por EDMD}
 \end{frame}
 
 % =============================================================================
@@ -533,7 +532,6 @@
     \begin{center}
         \includegraphics[width=0.96\linewidth,height=0.78\textheight,keepaspectratio]{figures/07_s2_radial.png}
     \end{center}
-    \framecite{Paleta gradual + colorbar para variable numérica $N$}
 \end{frame}
 
 \begin{frame}{Observables radiales cerca del obstáculo vs.\ $N$}
@@ -543,13 +541,12 @@
             \includegraphics[width=\linewidth,height=0.78\textheight,keepaspectratio]{figures/08_s2_radial_near.png}
         \end{column}
     \end{columns}
-    \framecite{Promedio en $S \in [1.5, 5]$ \si{m}; comparación $J_{\text{in}}$ con TP3}
 \end{frame}
 
 % =============================================================================
 % ANIMACIONES variando k (N fijo)
 % =============================================================================
-\begin{frame}{Animación -- $k = 10^{2}$ \si{N/m}, $N$ fijo}
+\begin{frame}{Animación -- $k = 10^{2}$ \si{N/m}, $N = 800$}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -562,14 +559,14 @@
             \textbf{Condiciones}
             \begin{itemize}
                 \item $k = 10^{2}$ \si{N/m}
-                \item $N = ?$ \framecite{Definir}
-                \item $\Delta t \approx \SI{6.3e-3}{s}$
+                \item $N = 800$
+                \item $\Delta t = \SI{5e-3}{s}$
             \end{itemize}
         \end{column}
     \end{columns}
 \end{frame}
 
-\begin{frame}{Animación -- $k = 10^{4}$ \si{N/m}, $N$ fijo}
+\begin{frame}{Animación -- $k = 10^{4}$ \si{N/m}, $N = 800$}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -582,8 +579,8 @@
             \textbf{Condiciones}
             \begin{itemize}
                 \item $k = 10^{4}$ \si{N/m}
-                \item $N = ?$ \framecite{Definir}
-                \item $\Delta t \approx \SI{6.3e-4}{s}$
+                \item $N = 800$
+                \item $\Delta t = \SI{1e-3}{s}$
             \end{itemize}
         \end{column}
     \end{columns}
@@ -597,19 +594,20 @@
     \vspace{0.3cm}
     \begin{tabular}{c c c}
         \hline
-        $k$ \si{[N/m]} & $\tau_{\text{col}} = 2\pi\sqrt{m/k}$ & $\Delta t$ elegido \\
+        $k$ \si{[N/m]} & $\Delta t$ elegido \\
         \hline
-        $10^{2}$  & $\approx \SI{0.63}{s}$  & $\approx \SI{6.3e-3}{s}$ \\
-        $10^{3}$  & $\approx \SI{0.20}{s}$  & $\approx \SI{2.0e-3}{s}$ \\
-        $10^{4}$  & $\approx \SI{0.063}{s}$ & $\approx \SI{6.3e-4}{s}$ \\
+        $10^{1}$  & $\approx \SI{1e-2}{s}$ \\
+        $10^{2}$  & $\approx \SI{5e-3}{s}$ \\
+        $10^{3}$  & $\approx \SI{1e-3}{s}$ \\
+        $10^{4}$  & $\approx \SI{1e-3}{s}$ \\
+        $10^{5}$  & $\approx \SI{5e-4}{s}$ \\
         \hline
     \end{tabular}
 
     \vspace{0.5cm}
     \begin{itemize}\setlength\itemsep{2pt}
-        \item Criterio: $\Delta t \approx \tau_{\text{col}}/100$.
-        \item Validado contra $|S_e|$ y deriva acumulada de $E(t)$ ($< 1\%$).
-        \item $\Delta t_2 = \SI{0.05}{s}$ común para muestreo (independiente de $\Delta t$).
+        \item Mismo estudio que para $k = 10^{3}$: evolución de $\Delta E_{\text{tot}}/E_0$ vs.\ $t$ por $\Delta t$,
+              pendiente $S_e$ vs.\ $\Delta t$.
     \end{itemize}
     \framecite{Valores a refinar con el análisis de $S_e$ -- ver \texttt{PLANPPT.md}}
 \end{frame}
@@ -620,18 +618,17 @@
     \end{center}
 \end{frame}
 
-\begin{frame}{Escalar característico vs.\ $k$}
+\begin{frame}{Escalar característico vs.\ $k$ para $N$ fijo}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
             \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/10_s2_k_scalar.png}
         \end{column}
         \begin{column}{0.32\textwidth}
-            \textbf{Escalar}: $\max_N \langle J\rangle(N,k)$
+            \textbf{Escalar}: $\max_N \langle J\rangle(k)$
             \vspace{0.2cm}
             \begin{itemize}\setlength\itemsep{2pt}
-                \item Crece con $k$ y satura hacia el límite event-driven.
-                \item Contacto más rígido $\Rightarrow$ menor tiempo de permanencia $\Rightarrow$ mayor $J$.
+                \item $\max_N \langle J\rangle$ constante para todo $k$.
             \end{itemize}
         \end{column}
     \end{columns}
