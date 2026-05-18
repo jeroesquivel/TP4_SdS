@@ -14,7 +14,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
-from _style import RESULTS, FIGURES, GRADIENT_CMAP, plain_n_colorbar, plain_log_axis
+from _style import RESULTS, FIGURES, TP3_DATA, GRADIENT_CMAP, plain_n_colorbar, plain_log_axis
 
 get_cmap = plt.get_cmap
 
@@ -112,26 +112,47 @@ def main():
     # Tres paneles horizontales — eje X (N) compartido. Cada observable
     # con su propio eje Y para que las barras de error no se superpongan.
     fig2, (ax_j, ax_rho, ax_v) = plt.subplots(
-        1, 3, figsize=(15.0, 5.2), sharex=True,
-        gridspec_kw={"wspace": 0.28})
+        1, 3, figsize=(15.0, 6.4), sharex=True,
+        gridspec_kw={"wspace": 0.30})
 
+    # Curva azul: TP4 J^in (flujo radial entrante).
     ax_j.errorbar(near["N"], near["j"], yerr=near["j_e"],
                   fmt="o-", color="#1f77b4", ecolor="#1f77b4", capsize=3, lw=2.0,
-                  markersize=8, markerfacecolor="white", markeredgewidth=1.8)
+                  markersize=8, markerfacecolor="white", markeredgewidth=1.8,
+                  label="TP4 (DM)")
+
+    # Curva roja: TP3 J convertido a flujo radial vía conservación
+    # J^in(S) = J_TP3 / (2 pi S) en cualquier anillo cerrado.
+    tp3 = TP3_DATA / "j_vs_n.csv"
+    S_REF = (S_NEAR_LO + S_NEAR_HI) / 2.0
+    if tp3.exists():
+        tp3_j = pd.read_csv(tp3).sort_values("N")
+        flux_ring = tp3_j["J_mean"] / (2.0 * np.pi * S_REF)
+        flux_err  = tp3_j.get("J_std", 0) / (2.0 * np.pi * S_REF)
+        ax_j.errorbar(tp3_j["N"], flux_ring, yerr=flux_err,
+                      fmt="s--", color="#d62728", ecolor="#d62728", capsize=3,
+                      lw=1.6, markersize=7, markerfacecolor="white",
+                      markeredgewidth=1.5, alpha=0.85, label="TP3 (EDMD)")
+        ax_j.legend(loc="upper left", frameon=True, framealpha=0.95, fontsize=9)
+
     ax_j.set_ylabel(r"$\langle J^{in} \rangle$  [m$^{-1}$ s$^{-1}$]")
     ax_j.set_xlabel("N")
 
     ax_rho.errorbar(near["N"], near["rho"], yerr=near["rho_e"],
                     fmt="s--", color="#2ca02c", ecolor="#2ca02c", capsize=3, lw=2.0,
-                    markersize=8, markerfacecolor="white", markeredgewidth=1.8)
+                    markersize=8, markerfacecolor="white", markeredgewidth=1.8,
+                    label="DM")
     ax_rho.set_ylabel(r"$\langle \rho^{f,in} \rangle$  [m$^{-2}$]")
     ax_rho.set_xlabel("N")
+    ax_rho.legend(loc="upper left", frameon=True, framealpha=0.95, fontsize=9)
 
     ax_v.errorbar(near["N"], near["v"], yerr=near["v_e"],
                   fmt="^:", color="#d62728", ecolor="#d62728", capsize=3, lw=2.0,
-                  markersize=8, markerfacecolor="white", markeredgewidth=1.8)
+                  markersize=8, markerfacecolor="white", markeredgewidth=1.8,
+                  label="DM")
     ax_v.set_ylabel(r"$|\langle v^{f,in} \rangle|$  [m/s]")
     ax_v.set_xlabel("N")
+    ax_v.legend(loc="upper left", frameon=True, framealpha=0.95, fontsize=9)
 
     for ax in (ax_j, ax_rho, ax_v):
         plain_log_axis(ax.xaxis, Ns_sorted)

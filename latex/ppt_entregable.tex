@@ -29,15 +29,15 @@
 \usepackage{siunitx}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,shapes.symbols,calc,shadows.blur,fit,backgrounds}
 \usepackage{hyperref}
 
 % Links de YouTube/Vimeo a las animaciones. Editar cuando estén subidos.
 % Si está vacío, la slide muestra "[link pendiente]" en lugar del URL.
-\newcommand{\videolinkNcien}{}        % N = 100,  k = 10^3
-\newcommand{\videolinkNmil}{}         % N = 1000, k = 10^3
-\newcommand{\videolinkKcien}{}        % k = 10^2
-\newcommand{\videolinkKdiezmil}{}     % k = 10^4
+\newcommand{\videolinkNcien}{https://youtube.com/shorts/UBXsQ1qOkjw}     % N = 100,  k = 10^3
+\newcommand{\videolinkNmil}{https://youtube.com/shorts/nkH3NUp6lnU}      % N = 1000, k = 10^3
+\newcommand{\videolinkKcien}{https://youtube.com/shorts/FhKU0qDAksE}     % k = 10^2
+\newcommand{\videolinkKdiezmil}{https://youtube.com/shorts/ZU5MfH7Uno0}  % k = 10^4
 
 % \simvideo{poster sin ext}{link YouTube/Vimeo (puede ser vacío)}
 % Versión entregable: muestra solo el frame y el link debajo.
@@ -184,49 +184,83 @@
 \begin{frame}{Arquitectura del proyecto}
     \centering
     \begin{tikzpicture}[
-        font=\footnotesize,
-        node distance=4mm and 5mm,
-        every node/.style={align=center, rounded corners=2pt, inner sep=3pt},
-        entry/.style ={draw, fill=blue!12,   minimum width=22mm, minimum height=7mm},
-        sim/.style   ={draw, fill=blue!25,   minimum width=28mm, minimum height=8mm},
-        mod/.style   ={draw, fill=gray!12,   minimum width=28mm, minimum height=6.5mm},
-        csvbox/.style={draw, fill=orange!18, minimum width=28mm, minimum height=7mm},
-        post/.style  ={draw, dashed, fill=gray!06, minimum width=28mm, minimum height=7mm},
-        flow/.style  ={-{Latex[length=1.6mm]}, semithick, gray!70!black},
+        x=1cm, y=1cm, font=\scriptsize,
+        every node/.style={align=center, inner sep=3pt, line width=0.5pt},
+        soft/.style={blur shadow={shadow blur steps=4, shadow blur extra rounding=1pt,
+                                  shadow xshift=0.5pt, shadow yshift=-0.7pt, shadow opacity=22}},
+        entry/.style ={rectangle, rounded corners=3pt, draw=blue!60!black,
+                       fill=blue!60!black, text=white,
+                       font=\scriptsize\bfseries\ttfamily,
+                       minimum width=2.5cm, minimum height=0.65cm, soft},
+        sim/.style   ={rectangle, rounded corners=3pt, draw=blue!55!black,
+                       fill=blue!28, font=\scriptsize\bfseries\ttfamily,
+                       minimum width=2.7cm, minimum height=0.70cm, soft},
+        expbox/.style={rectangle, rounded corners=3pt, draw=blue!45!black!70,
+                       fill=blue!12, font=\scriptsize\bfseries\ttfamily,
+                       minimum width=5.4cm, minimum height=0.65cm, soft},
+        mod/.style   ={rectangle, rounded corners=2pt, draw=gray!55,
+                       fill=gray!14, font=\scriptsize\ttfamily,
+                       minimum width=2.1cm, minimum height=0.62cm},
+        viz/.style   ={rectangle, rounded corners=2pt, draw=teal!55!black,
+                       fill=teal!18, font=\scriptsize\ttfamily,
+                       minimum width=2.4cm, minimum height=0.62cm},
+        csvbox/.style={cylinder, shape border rotate=90, aspect=0.22,
+                       draw=orange!70!black, fill=orange!22,
+                       font=\scriptsize\bfseries,
+                       minimum width=2.3cm, minimum height=0.80cm, soft},
+        post/.style  ={rectangle, rounded corners=2pt, draw=gray!55,
+                       dashed, fill=gray!05, font=\scriptsize\ttfamily,
+                       minimum width=2.4cm, minimum height=0.62cm},
+        flow/.style  ={-{Latex[length=1.6mm,width=1.4mm]},
+                       line width=0.65pt, color=blue!30!black!70,
+                       rounded corners=2pt},
+        title/.style ={font=\scriptsize\bfseries, text=blue!55!black,
+                       fill=blue!10, rounded corners=4pt,
+                       inner xsep=9pt, inner ysep=2.5pt,
+                       minimum width=2.4cm},
     ]
-        % --- Sistema 1 (izquierda) ---
-        \node[entry] (m1) {\textbf{\texttt{Main1}}\\\scriptsize ECM($\Delta t$)};
-        \node[sim, below=of m1] (s1) {\texttt{sim/Simulator}\\\scriptsize oscilador 1D};
-        \node[mod, below=of s1] (i1) {\texttt{integrators/}\\\scriptsize Euler -- Verlet -- Beeman -- Gear-5};
+        % ===================== Sistema 1 (columna izq) =====================
+        \node[title]   at (-3.6,  2.7) {Sistema 1};
+        \node[entry]   (m1) at (-3.6,  2.0) {Main1};
+        \node[sim]     (s1) at (-3.6,  0.85) {Simulator};
+        \node[mod]     (i1) at (-3.6, -0.35) {integrators/};
 
-        % --- Sistema 2 (derecha) ---
-        \node[entry, right=22mm of m1] (m2) {\textbf{\texttt{Main2}}\\\scriptsize \texttt{-{}-experiment}};
-        \node[mod, below=8mm of m2, fill=blue!06, minimum width=58mm] (exp)
-            {\texttt{experiments/}: \texttt{energy\_dt\_scan} $\cdot$ \texttt{timing} $\cdot$ \texttt{jvsn} $\cdot$ \texttt{ksweep}};
-        \node[sim, below=of exp] (s2) {\texttt{sim/Simulator2D}\\\scriptsize loop $\Delta t$ con \emph{hook} por paso};
-        \node[mod, below left=4mm and -10mm of s2] (i2) {\texttt{integrators/}\\\scriptsize Velocity-Verlet $\cdot$ Beeman};
-        \node[mod, below=of s2] (ph) {\texttt{physics/}\\\scriptsize \texttt{ForceModel} $\cdot$ \texttt{CellIndexMethod}};
-        \node[mod, below right=4mm and -10mm of s2] (ob) {\texttt{observables/}\\\scriptsize \texttt{CfcTracker} $\cdot$ perfiles radiales};
+        % ===================== Sistema 2 (columna der) =====================
+        \node[title]   at ( 1.6,  2.7) {Sistema 2};
+        \node[entry]   (m2)  at ( 1.6,  2.0) {Main2 -{}-experiment};
+        \node[expbox]  (exp) at ( 1.6,  0.85) {experiments/};
+        \node[sim]     (s2)  at ( 1.6, -0.35) {Simulator2D};
 
-        % --- Salida + postproceso ---
-        \node[csvbox, below=18mm of ph] (csv) {CSV (\texttt{results/})};
-        \node[post, right=8mm of csv] (plot) {\texttt{plotter/} (Python)\\\scriptsize no entregable};
+        % --- 3 módulos hijos + rama de animación (gap vertical p/ flechas) ---
+        \node[mod]     (i2)  at (-0.7, -1.80) {integrators/};
+        \node[mod]     (ph)  at ( 1.6, -1.80) {physics/};
+        \node[mod]     (ob)  at ( 3.9, -1.80) {observables/};
+        \node[viz]     (fx)  at ( 6.3, -1.80) {viz/FrameExporter};
 
-        % --- Flechas ---
+        % ===================== Salidas y postproceso =====================
+        \node[csvbox]  (csv)  at (-0.7, -2.85) {CSV \\ \scriptsize\itshape results/};
+        \node[csvbox]  (png)  at ( 6.3, -2.85) {PNG \\ \scriptsize\itshape latex/figures/};
+        \node[post]    (plot) at (-0.7, -3.85) {plotter/ (Python)};
+        \node[post]    (ff)   at ( 6.3, -3.85) {ffmpeg $\to$ MP4};
+
+        % ===================== Flechas internas =====================
         \draw[flow] (m1) -- (s1);
         \draw[flow] (s1) -- (i1);
         \draw[flow] (m2) -- (exp);
         \draw[flow] (exp) -- (s2);
-        \draw[flow] (s2) -- (i2);
-        \draw[flow] (s2) -- (ph);
-        \draw[flow] (s2) -- (ob);
-        \draw[flow] (i1.south) |- ($(csv.west)+(-4mm,0)$) -- (csv.west);
-        \draw[flow] (ph) -- (csv);
+        \draw[flow] (s2.south) -- (i2.north);
+        \draw[flow] (s2.south) -- (ph.north);
+        \draw[flow] (s2.south) -- (ob.north);
+        \draw[flow] (s2.south) -- (fx.north);
+
+        % Fan-in simétrico a CSV.
+        \draw[flow] (i1.south) |- (csv.west);
+        \draw[flow] (ob.south) |- (csv.east);
         \draw[flow] (csv) -- (plot);
 
-        % --- Etiquetas de columna ---
-        \node[above=1mm of m1, font=\scriptsize\bfseries, text=blue!50!black] {Sistema 1};
-        \node[above=1mm of m2, font=\scriptsize\bfseries, text=blue!50!black] {Sistema 2};
+        % Rama animación.
+        \draw[flow] (fx) -- (png);
+        \draw[flow] (png) -- (ff);
     \end{tikzpicture}
 \end{frame}
 
@@ -484,8 +518,9 @@
             \vspace{0.2cm}
             \textbf{Observación}
             \begin{itemize}\setlength\itemsep{1pt}
-                \item Log-log: ley de potencia $t_{\text{exec}} \propto N^{\alpha}$.
-                \item DM time-driven vs.\ EDMD del TP3.
+                \item Pendiente $\alpha$ del ajuste log-log $t_{\text{exec}}\propto N^{\alpha}$ sobre $N\in[100, 800]$.
+                \item TP4 (DM): $\alpha \approx 1{,}06$ -- casi lineal.
+                \item TP3 (EDMD): $\alpha \approx 3{,}62$ -- escala mucho peor con $N$.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -537,7 +572,15 @@
 
 \begin{frame}{Observables radiales cerca del obstáculo vs.\ $N$}
     \centering
-    \includegraphics[width=0.95\linewidth,height=0.85\textheight,keepaspectratio]{figures/08_s2_radial_near.png}
+    \noindent\hspace*{-7mm}%
+    \includegraphics[width=\dimexpr\textwidth+14mm\relax,height=0.86\textheight,keepaspectratio]{figures/08_s2_radial_near.png}
+\end{frame}
+
+\begin{frame}{Comparación con TP3 -- $J^{\,\text{in}}(N)$ en el anillo $S\!\in\![1{,}5,\,3]$ m}
+    \centering
+    \includegraphics[width=0.85\linewidth,height=0.74\textheight,keepaspectratio]{figures/13_s2_jin_vs_tp3.png}
+
+    {\footnotesize $J(N)$ TP3 (EDMD, rojo) vs.\ $J(N)$ TP4 (DM, azul) vs.\ $J^{\,\text{in}}(N)$ TP4 en anillo $S\!\sim\!2$ m (verde, escalado). $k = 10^3$ N/m.}
 \end{frame}
 
 % =============================================================================

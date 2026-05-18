@@ -56,17 +56,13 @@ def main():
         raise SystemExit(f"Falta {tp3}. Corré primero: python3 scripts/build_tp3_data.py")
     tp3_j = pd.read_csv(tp3).sort_values("N")
 
-    # --- Escala J^in al rango de J para que se compare visualmente ---
-    # Calcula el factor de escala como ratio J/J^in promediado sobre los N
-    # comunes entre tp4_j y tp4_jin.
-    common = tp4_j.merge(tp4_jin, on="N", how="inner")
-    if common.empty:
-        scale = 1.0
-    else:
-        ratio = common["J_mean"] / common["J_in"]
-        scale = float(ratio.mean())
-
-    print(f"factor de escala J / J^in (anillo S~[1.5,3]) = {scale:.2f}")
+    # Conservación de flujo radial estacionario:
+    #   J_scan (particulas/s)  ==  J^in(S) * 2 pi S   (en cualquier anillo S).
+    # Usamos S_REF = centro del anillo cercano al obstáculo para convertir
+    # J^in (TP4) → particulas/s y compararlo en el mismo eje que J de TP3/TP4.
+    S_REF = (S_NEAR_LO + S_NEAR_HI) / 2.0
+    scale = 2.0 * np.pi * S_REF
+    print(f"factor físico 2*pi*S (S={S_REF:.2f}) = {scale:.2f}")
 
     # =========== Figura ===========
     fig, ax = plt.subplots(figsize=(9.0, 5.4))
@@ -74,19 +70,19 @@ def main():
     ax.errorbar(tp3_j["N"], tp3_j["J_mean"], yerr=tp3_j.get("J_std", 0),
                 fmt="s--", color="#d62728", ecolor="#d62728",
                 capsize=4, lw=1.6, markersize=8, markerfacecolor="white",
-                markeredgewidth=1.8, label="EDMD")
+                markeredgewidth=1.8, label="EDMD $J$ (scanning rate)")
 
     ax.errorbar(tp4_j["N"], tp4_j["J_mean"], yerr=tp4_j["J_std"],
                 fmt="o-", color="#1f77b4", ecolor="#1f77b4",
                 capsize=4, lw=1.8, markersize=8, markerfacecolor="white",
-                markeredgewidth=1.8, label="DM")
+                markeredgewidth=1.8, label="DM $J$ (scanning rate)")
 
     ax.plot(tp4_jin["N"], scale * tp4_jin["J_in"], "^:", color="#2ca02c",
             lw=1.8, markersize=9, markerfacecolor="white", markeredgewidth=1.8,
-            label=rf"DM  $J^{{in}}\!\cdot\!{scale:.1f}$")
+            label=rf"DM $J^{{in}}\!\cdot\!2\pi S$ ($S={S_REF:.2f}$ m)")
 
     ax.set_xlabel("N")
-    ax.set_ylabel(r"$J$, $J^{in}$  [partículas / s]")
+    ax.set_ylabel(r"$J$  [partículas / s]")
     plain_log_axis(ax.xaxis, sorted(set(list(tp4_j["N"]) + list(tp3_j["N"]) + list(tp4_jin["N"]))))
     ax.legend(loc="upper left", frameon=True, framealpha=0.95, handlelength=2.6)
     ax.margins(y=0.10)
