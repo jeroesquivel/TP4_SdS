@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guion oral TP4 — Grupo 05</title>
+<style>
+  :root {
+    --primary: #1f4f8b;
+    --accent: #d62728;
+    --soft: #f4f7fb;
+    --border: #d8dee9;
+    --text: #1c1e21;
+    --muted: #6a7280;
+    --shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+    color: var(--text);
+    background: #fafbfc;
+    margin: 0;
+    line-height: 1.55;
+  }
+  header {
+    background: linear-gradient(135deg, var(--primary), #2d6cb7);
+    color: white;
+    padding: 28px 40px 20px;
+    box-shadow: var(--shadow);
+  }
+  header h1 { margin: 0 0 6px; font-size: 1.7em; font-weight: 600; }
+  header .meta { font-size: 0.95em; opacity: 0.88; }
+  nav.toc {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 40px;
+    position: sticky; top: 0; z-index: 10;
+    box-shadow: var(--shadow);
+  }
+  nav.toc a {
+    display: inline-block;
+    margin-right: 14px;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 500;
+  }
+  nav.toc a:hover { text-decoration: underline; }
+  main { max-width: 1100px; margin: 0 auto; padding: 30px 40px 60px; }
+  section.chapter { margin-bottom: 48px; }
+  section.chapter > h2 {
+    color: var(--primary);
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: 8px;
+    margin-top: 0;
+    font-size: 1.5em;
+  }
+  section.chapter > h2 small {
+    float: right;
+    color: var(--muted);
+    font-weight: normal;
+    font-size: 0.65em;
+    margin-top: 6px;
+  }
+  article.slide {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin: 16px 0;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 22px;
+    align-items: start;
+  }
+  article.slide.full { grid-template-columns: 1fr; }
+  article.slide h3 {
+    grid-column: 1 / -1;
+    margin: 0 0 4px;
+    color: var(--primary);
+    font-size: 1.12em;
+  }
+  article.slide h3 .timing {
+    color: var(--muted);
+    font-weight: normal;
+    font-size: 0.78em;
+    margin-left: 8px;
+  }
+  article.slide figure {
+    margin: 0;
+    background: var(--soft);
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+  }
+  article.slide figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+  article.slide figcaption {
+    font-size: 0.78em;
+    color: var(--muted);
+    margin-top: 6px;
+    font-style: italic;
+  }
+  article.slide .talk {
+    font-size: 0.95em;
+  }
+  article.slide .talk p { margin: 0 0 10px; }
+  article.slide .talk p:last-child { margin-bottom: 0; }
+  article.slide .talk strong { color: var(--primary); }
+  .callout {
+    background: #fff8e1;
+    border-left: 4px solid #f5a623;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 0.88em;
+  }
+  .callout strong { color: #8c5a00; }
+  section.tips article {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    box-shadow: var(--shadow);
+  }
+  section.tips article p { margin: 0; font-size: 0.95em; }
+  section.tips article p .q {
+    color: var(--accent);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85em;
+    padding: 20px 0 40px;
+  }
+  @media (max-width: 740px) {
+    nav.toc { padding: 10px 16px; }
+    main { padding: 20px 16px 40px; }
+    article.slide { grid-template-columns: 1fr; }
+    article.slide h3 .timing { display: block; margin-left: 0; }
+  }
+  @media print {
+    nav.toc { position: static; }
+    article.slide { break-inside: avoid; box-shadow: none; }
+    section.chapter { break-before: page; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Guion oral — TP4 Simulación de Sistemas</h1>
+  <div class="meta">Grupo 05 · Caules · Esquivel · Cortese · 13 minutos · 18/05/2026</div>
+</header>
+
+<nav class="toc">
+  <a href="#s1">1. Sistema 1</a>
+  <a href="#intro">2. Introducción</a>
+  <a href="#impl">3. Implementación</a>
+  <a href="#sim">4. Simulaciones</a>
+  <a href="#res">5. Resultados</a>
+  <a href="#concl">6. Conclusiones</a>
+  <a href="#tips">7. Tips defensa</a>
+</nav>
+
+<main>
+
+<!-- ============================================================== -->
+<section id="s1" class="chapter">
+  <h2>1. Sistema 1 — Oscilador amortiguado <small>~1 min · 2 slides</small></h2>
+
+  <article class="slide">
+    <h3>Trayectorias r(t) — numérica vs analítica <span class="timing">~30 s</span></h3>
+    <figure>
+      <img src="../latex/figures/01_s1_r_vs_t.png" alt="r(t) numérico vs analítico">
+      <figcaption>4 integradores comparados contra solución analítica · Δt = 10⁻³ s</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Tenemos un <strong>oscilador amortiguado con solución analítica</strong> conocida, así que sirve para comparar integradores numéricos contra una verdad de referencia.</p>
+      <p>Probamos los cuatro del enunciado: <strong>Euler PC, Verlet original, Beeman PC y Gear orden 5</strong>. Acá, con un Δt razonable de 10⁻³ segundos, fíjense que <strong>Gear-5 y Beeman se superponen perfectamente con la analítica</strong> — no se distinguen. En cambio Euler y Verlet ya empiezan a desviarse, se ve a simple vista.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>ECM vs Δt <span class="timing">~30 s</span></h3>
+    <figure>
+      <img src="../latex/figures/02_s1_ecm_vs_dt.png" alt="ECM vs Δt log-log">
+      <figcaption>Error cuadrático medio en log-log · la pendiente da el orden del método</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Esta es la pinta clásica: ECM en log-log. La <strong>pendiente</strong> de cada curva te dice el orden del integrador.</p>
+      <p>Euler PC va con pendiente 2 — lo esperado para un método de orden 1. Verlet también pendiente 2, y esto es importante remarcarlo: <strong>como la fuerza depende de la velocidad y Verlet original usa la v lageada</strong> del paso anterior, el orden efectivo baja. Beeman PC sí llega a pendiente 4 (orden 2 con predictor de velocidad). Y <strong>Gear-5 con α₀ = 3/16 toca el piso numérico</strong> para Δt ≤ 10⁻³ — es el límite del doble flotante.</p>
+      <p>Conclusión directa: <strong>Gear-5 minimiza el ECM</strong> en todo el rango.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============================================================== -->
+<section id="intro" class="chapter">
+  <h2>2. Sistema 2 — Introducción <small>~45 s</small></h2>
+
+  <article class="slide full">
+    <h3>Sistema real y modelo matemático <span class="timing">~45 s</span></h3>
+    <div class="talk">
+      <p>Pasamos al <strong>Sistema 2</strong>, que es el mismo sistema físico del TP3: partículas en un recinto circular con un obstáculo central fijo.</p>
+      <p>La diferencia clave acá es que <strong>el contacto ya no es instantáneo</strong>. En lugar del choque puntual del EDMD, modelamos una <strong>fuerza elástica blanda</strong>: F = k·ξ·ê, que se activa solo cuando hay solapamiento (ξ > 0). Imagínenlo como un resorte que <em>solo empuja</em>, no atrae.</p>
+      <p>El obstáculo central y la pared se tratan como entes de masa infinita con la misma ley. Y como cualquier DM por paso temporal, <strong>el Δt lo validamos con conservación de energía</strong>.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============================================================== -->
+<section id="impl" class="chapter">
+  <h2>3. Sistema 2 — Implementación <small>~45 s · 3 slides</small></h2>
+
+  <article class="slide full">
+    <h3>Arquitectura del proyecto</h3>
+    <div class="talk">
+      <p>Acá tienen la organización del proyecto. A la izquierda Sistema 1 con su Main, el simulador y los cuatro integradores. A la derecha Sistema 2, más complejo: <strong>Main2 recibe el experimento por CLI</strong> (energy_dt_scan, timing, jvsn, ksweep), todos pasan por el <strong>Simulator2D</strong> que delega en tres módulos hijos: <strong>physics</strong> (fuerzas con Cell Index Method), <strong>integrators</strong> (Velocity-Verlet y Beeman), y <strong>observables</strong> (CfcTracker y perfiles radiales).</p>
+      <p>Aparte está la rama de animación: <strong>viz/FrameExporter</strong> tira PNGs que después ffmpeg arma en MP4. Todo lo de postproceso (plotter Python y ffmpeg) tiene borde punteado: <em>no va en el código entregable</em>.</p>
+    </div>
+  </article>
+
+  <article class="slide full">
+    <h3>Motor de simulación <span class="timing">~45 s</span></h3>
+    <div class="talk">
+      <p>El loop principal hace lo de siempre en DM:</p>
+      <ol>
+        <li><strong>Sembrar N partículas</strong> sin solapamiento (rejection sampling).</li>
+        <li>Indexar en <strong>Cell Index Method</strong> con celda = 2·r_max para evitar comparar pares lejanos.</li>
+        <li>Mientras t &lt; t_f: <strong>calcular fuerzas</strong> (O(N) con CIM), <strong>integrar un paso</strong> de Velocity-Verlet 2D, <strong>detectar flancos de contacto</strong> para actualizar el estado fresca/usada, y <strong>acumular C_fc(t)</strong> con resolución Δt completa.</li>
+      </ol>
+      <p>El estado se snapshotea cada Δt₂ para los perfiles radiales. Elegimos <strong>Velocity-Verlet</strong> porque es simpléctico y acá la fuerza solo depende de la posición.</p>
+    </div>
+  </article>
+
+  <article class="slide full">
+    <h3>Integradores implementados</h3>
+    <div class="talk">
+      <p>En <strong>Sistema 1</strong> implementamos los cuatro del enunciado: Euler PC, Verlet, Beeman PC y Gear-5. Ojo con Gear-5: usa <strong>α₀ = 3/16</strong> (no 3/20) porque la fuerza depende de la velocidad.</p>
+      <p>En <strong>Sistema 2</strong> alcanza Velocity-Verlet (simpléctico, F = F(x)). Beeman 2D está implementado también para verificación cruzada.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============================================================== -->
+<section id="sim" class="chapter">
+  <h2>4. Sistema 2 — Simulaciones <small>~2 min · 4 slides</small></h2>
+
+  <article class="slide full">
+    <h3>Sistema particular <span class="timing">~30 s</span></h3>
+    <div class="talk">
+      <p>Los números: <strong>recinto circular de 80 m de diámetro</strong>, obstáculo de 1 m de radio en el centro. Partículas de r = 1 m y m = 1 kg, con velocidad inicial de magnitud 1 m/s en dirección random uniforme.</p>
+      <p>Definimos dos estados: una partícula arranca <strong>fresca</strong> y pasa a <strong>usada</strong> cuando toca el obstáculo. Vuelve a fresca cuando toca el borde. Esto es directo del TP3.</p>
+    </div>
+  </article>
+
+  <article class="slide full">
+    <h3>Observables 1/2 — scanning rate <span class="timing">~45 s</span></h3>
+    <div class="talk">
+      <p><strong>C_fc(t)</strong> es el contador acumulado de transiciones fresca → usada. <strong>Detalle crítico</strong>: como ahora el contacto dura varios Δt, solo contamos el <strong>primer Δt</strong> de cada contacto, no todos los pasos que dura.</p>
+      <p><strong>J</strong> es la pendiente de C_fc(t) por mínimos cuadrados sobre la ventana completa [0, t_f]. Promediamos ⟨J⟩ sobre <strong>M = 100 realizaciones</strong> por (N, k), con desvío estándar.</p>
+    </div>
+  </article>
+
+  <article class="slide full">
+    <h3>Observables 2/2 — perfiles radiales <span class="timing">~30 s</span></h3>
+    <div class="talk">
+      <p>Dividimos el recinto en <strong>capas concéntricas</strong> de ancho dS = 0,2 m. En cada capa filtramos las partículas <strong>frescas con velocidad radial entrante</strong> (x·v &lt; 0).</p>
+      <p>Calculamos tres cosas: densidad ⟨ρ⟩, módulo de velocidad radial promedio |⟨v⟩|, y el flujo <strong>J^in = ρ · |v|</strong>. Si una capa queda vacía en algún snapshot, la excluimos del promedio de velocidad para no romper el cálculo.</p>
+    </div>
+  </article>
+
+  <article class="slide full">
+    <h3>Parámetros y realizaciones <span class="timing">~15 s</span></h3>
+    <div class="talk">
+      <p>N de 100 a 1000 en pasos de 100. k en cuatro órdenes de magnitud (10², 10³, 10⁴, 10⁵). El Δt depende del k y lo validamos con energía. <strong>t_f = 500 s</strong> para todos los observables, <strong>M = 10 realizaciones</strong> base (M = 100 en J vs N para barras chicas).</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============================================================== -->
+<section id="res" class="chapter">
+  <h2>5. Sistema 2 — Resultados <small>~7 min</small></h2>
+
+  <article class="slide">
+    <h3>Animaciones variando N (k = 10³) <span class="timing">~45 s · 2 slides</span></h3>
+    <figure>
+      <img src="../latex/figures/N=100.png" alt="Animación N=100">
+      <figcaption>N = 100 · k = 10³ N/m</figcaption>
+      <img src="../latex/figures/N=1000.png" alt="Animación N=1000" style="margin-top:8px">
+      <figcaption>N = 1000 · k = 10³ N/m</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Mismo k = 10³, dos N distintos para ver el contraste.</p>
+      <p>Con <strong>N = 100</strong>: poca densidad, pocas colisiones, las usadas vuelven rápido al borde. El sistema respira.</p>
+      <p>Con <strong>N = 1000</strong>: alta densidad, muchas usadas atrapadas cerca del obstáculo — <strong>se ve el efecto de bloqueo</strong>. El sistema entra rápido en régimen estacionario en ambos casos.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>Conservación de energía vs Δt (k = 10³) <span class="timing">~45 s · 2 slides</span></h3>
+    <figure>
+      <img src="../latex/figures/03d_s2_energy_dt_scan_k1e3.png" alt="ΔE/E₀ vs t por Δt">
+      <figcaption>Drift relativo de energía total por Δt · gradiente viridis</figcaption>
+      <img src="../latex/figures/03f_s2_energy_dt_slope_k1e3.png" alt="Pendiente Se vs Δt" style="margin-top:8px">
+      <figcaption>Pendiente S_e del drift vs Δt</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Esto es lo que <strong>justifica nuestra elección de Δt</strong>. La métrica es el drift relativo de la energía total.</p>
+      <p>A <strong>Δt grande</strong> la energía deriva visible; a <strong>Δt chico</strong> se mantiene dentro del 1%. Definimos S_e como la pendiente lineal del drift y la graficamos vs Δt.</p>
+      <p>Para k = 10³ elegimos <strong>Δt = 10⁻³ s</strong> — drift menor al 0,1% en 2000 segundos. Equivalente a τ_col/200. Suficiente y con margen para t_f = 500 s.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>Tiempo de ejecución vs N — comparación con TP3 <span class="timing">~45 s</span></h3>
+    <figure>
+      <img src="../latex/figures/04_s2_timing.png" alt="Timing vs N">
+      <figcaption>t_exec vs N · TP4 (DM) vs TP3 (EDMD) · ajuste log-log en [100, 800]</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Comparación con TP3. Ambas siguen <strong>ley de potencia</strong> en el rango común [100, 800].</p>
+      <p>Nuestro <strong>TP4 (DM con CIM): α ≈ 1,06</strong> — esencialmente lineal con N. El <strong>TP3 (EDMD): α ≈ 3,62</strong> — escala mucho peor porque la priority queue de eventos crece más que cuadrática.</p>
+      <p><strong>Cruce en N ≈ 500</strong>: para N chico EDMD gana, para N grande DM gana y la ventaja crece con N. Esto es uno de los puntos fuertes del time-driven para N grande.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>Evolución temporal de C_fc(t) <span class="timing">~30 s</span></h3>
+    <figure>
+      <img src="../latex/figures/05_s2_cfc_t.png" alt="Cfc vs t">
+      <figcaption>C_fc(t) acumulado · una curva por N</figcaption>
+    </figure>
+    <div class="talk">
+      <p>C_fc crece <strong>linealmente desde casi el principio</strong> — el transitorio es muy corto, por eso ajustamos la pendiente sobre la ventana completa [0, t_f].</p>
+      <p>Para N más grande la pendiente es mayor (más eventos), pero también más bloqueo cerca del obstáculo.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>⟨J⟩ vs N <span class="timing">~30 s</span></h3>
+    <figure>
+      <img src="../latex/figures/06_s2_j_vs_n.png" alt="J vs N">
+      <figcaption>Scanning rate promedio · TP4 (azul) y TP3 (rojo)</figcaption>
+    </figure>
+    <div class="talk">
+      <p>El resultado central: <strong>⟨J⟩ crece con N, satura cerca de N* ≈ 500-600, y después decae</strong>.</p>
+      <p>O sea: <em>más partículas no siempre significan más eventos detectados</em>. Pasado cierto N el efecto de bloqueo cerca del obstáculo es tal que la tasa cae. Las barras son σ sobre 100 realizaciones.</p>
+      <p>La forma <strong>reproduce la J(N) del TP3</strong> en el mismo rango — distinto método, misma física.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>Perfiles radiales J^in(S) <span class="timing">~45 s · 2 slides</span></h3>
+    <figure>
+      <img src="../latex/figures/07_s2_radial.png" alt="Perfiles radiales J_in(S)">
+      <figcaption>J^in(S) para todos los N · panel completo + zoom S ∈ [2, 5] m</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Una curva por N con colorbar viridis. J^in es <strong>chico en S grande</strong> (zona exterior), <strong>crece hacia el obstáculo</strong>, y muestra estructura interesante en el rango [1,5, 5] m por la zona donde las partículas usadas vuelven hacia afuera.</p>
+      <p>El zoom de la derecha es para identificar bien la zona del obstáculo.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>Observables radiales cerca del obstáculo vs N <span class="timing">~30 s</span></h3>
+    <figure>
+      <img src="../latex/figures/08_s2_radial_near.png" alt="J^in, ρ, v vs N cerca del obstáculo">
+      <figcaption>Anillo S ∈ [1,5; 3] m · panel azul/rojo: TP4 vs TP3 mismo eje</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Promediamos los tres observables en la franja S ∈ [1,5; 3] m.</p>
+      <p>La <strong>densidad ⟨ρ⟩ y el flujo J^in tienen la misma forma</strong> — crecen, saturan y decaen con máximo en N ≈ 500. La velocidad |⟨v⟩| crece monótono hasta N ≈ 800. <strong>El máximo de J^in está dominado por la densidad, no por la velocidad</strong>.</p>
+      <div class="callout">
+        <strong>Panel azul/rojo (mismo eje):</strong> la curva roja es J de TP3 convertida a flujo radial vía la relación física <em>J^in(S) = J / (2πS)</em> con S = 2,25 m. Coincide casi perfecto con nuestra curva azul — confirma que ambos métodos miden el mismo flujo radial.
+      </div>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>Comparación J^in vs J(N) TP3 <span class="timing">~30 s</span></h3>
+    <figure>
+      <img src="../latex/figures/13_s2_jin_vs_tp3.png" alt="J^in vs J TP3">
+      <figcaption>3 curvas: TP3 J (EDMD), TP4 J (DM), TP4 J^in × 2πS</figcaption>
+    </figure>
+    <div class="talk">
+      <p>La slide explícita de comparación pedida por el enunciado. <strong>Tres curvas en el mismo eje</strong>:</p>
+      <ul>
+        <li><strong>Roja:</strong> J del TP3 (scanning rate EDMD).</li>
+        <li><strong>Azul:</strong> J del TP4 (scanning rate DM).</li>
+        <li><strong>Verde:</strong> nuestro J^in multiplicado por 2πS (S = 2,25 m), que físicamente equivale a la rate de partículas que cruzan el anillo cercano.</li>
+      </ul>
+      <p>Las tres tienen la <strong>misma forma cualitativa con máximo cerca de N = 500</strong>. Confirma que la scanning rate global y el flujo en el anillo cercano son la misma cosa, vista desde dos ángulos.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>Animaciones variando k (N = 800) <span class="timing">~30 s · 2 slides</span></h3>
+    <figure>
+      <img src="../latex/figures/k=100.png" alt="Animación k=100">
+      <figcaption>k = 10² N/m · contacto blando</figcaption>
+      <img src="../latex/figures/k=10000.png" alt="Animación k=10000" style="margin-top:8px">
+      <figcaption>k = 10⁴ N/m · contacto rígido</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Mismo N, dos k distintos para mostrar cómo cambia la dinámica.</p>
+      <p>Con <strong>k = 10² (blando)</strong>: se ven solapamientos profundos, los contactos duran mucho tiempo. Con <strong>k = 10⁴ (rígido)</strong>: contactos breves — la dinámica se parece más a EDMD.</p>
+      <p>La constante elástica <strong>regula el tiempo de permanencia en contacto</strong>.</p>
+    </div>
+  </article>
+
+  <article class="slide full">
+    <h3>Δt elegido por k <span class="timing">~30 s</span></h3>
+    <div class="talk">
+      <p>Criterio: <strong>Δt ≤ τ_col/40</strong>, con τ_col = 2π√(m/k). Validado empíricamente con drift de energía menor al 1% en 2000 s para todos los k.</p>
+      <p>Para k = 10² → Δt = 5·10⁻³ s; k = 10³ → 10⁻³ s; k = 10⁴ → 10⁻³ s; k = 10⁵ → 5·10⁻⁴ s. El Δt₂ de muestreo es común (0,05 s), independiente del Δt de integración.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>⟨J⟩ y ⟨J^in⟩ vs N — barrido en k <span class="timing">~30 s</span></h3>
+    <figure>
+      <img src="../latex/figures/09_s2_k_sweep.png" alt="J y J^in vs N por k">
+      <figcaption>Cuatro curvas por observable, una por k</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Cuatro curvas por panel, una por k. La <strong>forma cualitativa se mantiene</strong>: crece y satura. El N* del máximo se corre con k.</p>
+    </div>
+  </article>
+
+  <article class="slide">
+    <h3>Escalar característico vs k <span class="timing">~30 s</span></h3>
+    <figure>
+      <img src="../latex/figures/10_s2_k_scalar.png" alt="max J vs k">
+      <figcaption>max_N ⟨J⟩(N, k) como escalar característico</figcaption>
+    </figure>
+    <div class="talk">
+      <p>Tomamos como escalar característico <strong>max_N ⟨J⟩(N, k)</strong>.</p>
+      <p>Decrece levemente con k y satura. Interpretación: <strong>contacto más rígido reduce el tiempo de permanencia</strong> y por ende el flujo máximo. El N* tiende a aumentar con k.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============================================================== -->
+<section id="concl" class="chapter">
+  <h2>6. Conclusiones <small>~45 s</small></h2>
+
+  <article class="slide full">
+    <h3>Cuatro takeaways</h3>
+    <div class="talk">
+      <ol>
+        <li><strong>Sistema 1:</strong> Gear-5 con α₀ = 3/16 minimiza el ECM para el oscilador con F(r, v). Pendientes en log-log consistentes con los órdenes teóricos.</li>
+        <li><strong>Validación de Δt:</strong> energía total con drift menor al 1% en todos los k.</li>
+        <li><strong>⟨J⟩(N):</strong> crece, satura cerca de N* ≈ 500-600 y decae. El flujo radial cerca del obstáculo reproduce la forma global — confirma físicamente la equivalencia con TP3.</li>
+        <li><strong>Escalado:</strong> DM time-driven α ≈ 1,06 vs EDMD α ≈ 3,62 en el rango común. Cruce en N ≈ 500, la ventaja del DM crece con N.</li>
+      </ol>
+    </div>
+  </article>
+</section>
+
+<!-- ============================================================== -->
+<section id="tips" class="chapter tips">
+  <h2>7. Tips para defender en vivo</h2>
+
+  <article>
+    <p><span class="q">¿Por qué Verlet da pendiente 2 en lugar de 4?</span>
+    Porque la fuerza depende de v, y Verlet original evalúa la fuerza con la velocidad <em>lageada</em> del paso anterior. Eso baja el orden efectivo a 1.</p>
+  </article>
+
+  <article>
+    <p><span class="q">¿Por qué EDMD escala peor con N?</span>
+    Priority queue con O(N²) potenciales eventos, cada extracción log; sin lazy invalidation las invalidaciones se acumulan y el exponente crece a partir de cierto N.</p>
+  </article>
+
+  <article>
+    <p><span class="q">¿Por qué α₀ = 3/16 y no 3/20?</span>
+    3/16 es el coeficiente de Gear-5 para fuerzas que dependen de la velocidad. El caso F(r) usa 3/20.</p>
+  </article>
+
+  <article>
+    <p><span class="q">¿Por qué Velocity-Verlet en Sistema 2?</span>
+    F = -k·ξ·ê depende solo de la posición. Velocity-Verlet es simpléctico, conserva energía a largo plazo y es simple. Gear sería overkill y sufre con la discontinuidad de derivada de F en ξ = 0.</p>
+  </article>
+
+  <article>
+    <p><span class="q">¿Por qué el cruce está en N ≈ 500?</span>
+    Es el N donde el costo lineal del DM (CIM + integración fija) iguala el costo super-cúbico del EDMD por evento. Para N &lt; 500 EDMD gana; para N &gt; 500 DM gana y la ventaja crece.</p>
+  </article>
+
+  <article>
+    <p><span class="q">¿Cómo validan la conservación de energía?</span>
+    Graficamos ΔE_tot/E₀ vs t para varios Δt. Pendiente del drift S_e como métrica. Para k = 10³ con Δt = 10⁻³ s el drift es menor al 0,1% en 2000 s — sobra para t_f = 500 s.</p>
+  </article>
+
+  <article>
+    <p><span class="q">¿Cómo cuentan el "primer Δt del contacto"?</span>
+    Flag booleano por partícula. Si ξ &gt; 0 y antes era ξ ≤ 0, contamos la transición. Eso evita contar muchas veces el mismo contacto que dura múltiples Δt.</p>
+  </article>
+
+  <article>
+    <p><span class="q">¿Cuál es la diferencia clave con TP3?</span>
+    TP3 usa EDMD: colisión instantánea con cambio de velocidad por la ley de choque elástico. TP4 usa DM por paso temporal: el contacto dura varios Δt y se modela como fuerza. Los observables C_fc y J están definidos para que sean directamente comparables.</p>
+  </article>
+
+  <article>
+    <p><span class="q">¿Por qué |⟨v⟩| crece monótono y J^in no?</span>
+    Con M = 100 la curva de |⟨v⟩| es suave y monótona hasta N ≈ 800. El dip aparente que se veía con M = 10 era ruido estadístico — se eliminó al subir realizaciones. El máximo de J^in viene dado por la densidad.</p>
+  </article>
+</section>
+
+</main>
+
+<footer>
+  TP4 SDS · Grupo 05 · Generado a partir de <code>guiones/*.md</code>
+</footer>
+
+</body>
+</html>
