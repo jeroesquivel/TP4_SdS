@@ -23,12 +23,12 @@ def main():
     slope4, intercept4, sub4 = fit_loglog(df, "N", "t_exec_s",
                                           OVERLAP_MIN, OVERLAP_MAX)
     label_tp4 = fr"TP4 (DM)  $\alpha = {slope4:.2f}$"
-    ax.semilogy(df["N"], df["t_exec_s"], "o-", color="#1f77b4", lw=2.0,
+    ax.plot(df["N"], df["t_exec_s"], "o-", color="#1f77b4", lw=2.0,
                 markersize=9, markerfacecolor="white", markeredgewidth=1.8,
                 label=label_tp4)
 
     n_span4 = np.linspace(sub4["N"].min(), sub4["N"].max(), 50)
-    ax.semilogy(n_span4, 10 ** (slope4 * np.log10(n_span4) + intercept4),
+    ax.plot(n_span4, 10 ** (slope4 * np.log10(n_span4) + intercept4),
                 ":", color="#1f77b4", lw=1.2, alpha=0.6)
 
     # TP3 — ajuste estrictamente sobre el overlap; los puntos chicos
@@ -44,12 +44,12 @@ def main():
                                             np.log10(overlap3["t_exec"]), 1)
             label_tp3 = fr"TP3 (EDMD)  $\alpha = {slope3:.2f}$"
             n_span3 = np.linspace(overlap3["N"].min(), overlap3["N"].max(), 50)
-            ax.semilogy(n_span3,
+            ax.plot(n_span3,
                       10 ** (slope3 * np.log10(n_span3) + intercept3),
                       ":", color="#d62728", lw=1.2, alpha=0.6)
         else:
             label_tp3 = "TP3 (EDMD)"
-        ax.semilogy(d3["N"], d3["t_exec"], "s--", color="#d62728", lw=1.6,
+        ax.plot(d3["N"], d3["t_exec"], "s--", color="#d62728", lw=1.6,
                     markersize=9, markerfacecolor="white", markeredgewidth=1.8,
                     label=label_tp3)
 
