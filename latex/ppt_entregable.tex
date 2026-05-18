@@ -428,30 +428,24 @@
 % =============================================================================
 % Validación de Δt @ k=10³: evolución de E(t) y pendiente Se
 % =============================================================================
-\begin{frame}{Conservación de energía vs.\ $\Delta t$ -- $k = 10^{3}$ \si{N/m}}
+\begin{frame}{Conservación de energía: Evolución temporal}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
             \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/03d_s2_energy_dt_scan_k1e3.png}
         \end{column}
         \begin{column}{0.32\textwidth}
-            \textbf{Métrica}\\[2pt]
-            \resizebox{\linewidth}{!}{$\dfrac{\Delta E_{\text{tot}}(t)}{E_0} = \dfrac{E_{\text{tot}}(t)-E_0}{E_0}$}
-            \vspace{0.2cm}
-
-            \textbf{Observación}
+            \textbf{Parámetros}:
             \begin{itemize}\setlength\itemsep{1pt}
-                \item Curva por $\Delta t$, gradiente viridis.
-                \item Umbral de deriva: $\pm 1\%$.
-                \item $\Delta t$ chico $\Rightarrow$ deriva acotada.
+                \item $N = 800$
+                \item $t_f = \SI{2000}{s}$
+                \item $k = 10^{3}$ \si{N/m}
             \end{itemize}
-            \vspace{0.1cm}
-            \textbf{Parámetros}: $N = 800$, $t_f = \SI{2000}{s}$.
         \end{column}
     \end{columns}
 \end{frame}
 
-\begin{frame}{Pendiente $S_e$ del error de energía y $\Delta t$ elegido -- $k = 10^{3}$}
+\begin{frame}{Pendiente $S_e$ del error de energía en función de $\Delta t$}
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
@@ -459,18 +453,14 @@
         \end{column}
         \begin{column}{0.32\textwidth}
             \textbf{$S_e$}\\[2pt]
-            Pendiente lineal de
-            $\Delta E_{\text{tot}}/E_0$ vs.\ $t$ (regresión).
+            Pendiente de
+            $\Delta E_{\text{tot}}/E_0$ vs.\ $t$ por ajuste lineal (cuadrados mínimos).
             \vspace{0.15cm}
 
-            \textbf{Criterio}
-            \begin{itemize}\setlength\itemsep{1pt}
-                \item $|S_e|$ chico $\Rightarrow$ drift acotado.
-                \item Bajar $\Delta t$ baja $|S_e|$ hasta el piso numérico.
-            \end{itemize}
-            \vspace{0.1cm}
             \textbf{$\Delta t$ elegido} para $k = 10^{3}$:
-            $\Delta t = \SI{2.0e-3}{s}$
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item $\Delta t = \SI{1.0e-3}{s}$
+            \end{itemize}
 \end{column}
     \end{columns}
 \end{frame}
@@ -526,13 +516,6 @@
             \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/06_s2_j_vs_n.png}
         \end{column}
         \begin{column}{0.32\textwidth}
-            \textbf{Parámetros}
-            \begin{itemize}\setlength\itemsep{1pt}
-                \item $k = 10^{3}$ \si{N/m}
-                \item $M = 100$ realizaciones
-                \item Barras: $\sigma$ sobre realizaciones
-            \end{itemize}
-            \vspace{0.2cm}
             \textbf{Observación}
             \begin{itemize}\setlength\itemsep{1pt}
                 \item Crece y satura con $N$.
@@ -550,14 +533,11 @@
     \begin{center}
         \includegraphics[width=0.92\linewidth,height=0.74\textheight,keepaspectratio]{figures/07_s2_radial.png}
     \end{center}
-    {\footnotesize $k = 10^3$ N/m \quad $M = 100$ realizaciones \quad ventana $t \in [t_f/2,\,t_f]$ \quad capas $\mathrm{d}S = \SI{0.2}{m}$}
 \end{frame}
 
 \begin{frame}{Observables radiales cerca del obstáculo vs.\ $N$}
     \centering
-    \includegraphics[width=0.92\linewidth,height=0.74\textheight,keepaspectratio]{figures/08_s2_radial_near.png}
-
-    {\footnotesize Capa cercana al obstáculo $S \in [1.5,\,3.0]$ m, ponderado por $n_{\text{samples}}$. $k = 10^3$ N/m, $M = 100$ realizaciones.}
+    \includegraphics[width=0.95\linewidth,height=0.85\textheight,keepaspectratio]{figures/08_s2_radial_near.png}
 \end{frame}
 
 % =============================================================================
@@ -644,7 +624,8 @@
             \textbf{Escalar}: $\max_N \langle J\rangle(k)$
             \vspace{0.2cm}
             \begin{itemize}\setlength\itemsep{2pt}
-                \item $\max_N \langle J\rangle$ constante para todo $k$.
+                \item En $k = 10$, el solapamiento infla el conteo de contactos, dando un $J$ artificialmente alto.
+                \item $\max_N \langle J\rangle$ constante para todo $k$, descartando $k=10$.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -662,10 +643,10 @@
 
 \begin{frame}{Conclusiones}
     \begin{itemize}\setlength\itemsep{4pt}
-        \item \textbf{Sistema 1}: Gear-5 con $\alpha_0 = 3/16$ minimiza el ECM en todo el rango de $\Delta t$ estudiado; pendientes en log-log consistentes con el orden teórico de cada integrador.
-        \item \textbf{Sistema 2}: el scanning rate $\langle J\rangle$ crece con $N$ y satura; el régimen cerca del obstáculo está dominado por la densidad de partículas frescas entrantes.
-        \item La fuerza elástica blanda con $k$ creciente reproduce el límite event-driven del TP3.
         \item DM time-driven escala mejor con $N$ que EDMD en el rango estudiado.
+        \item El scanning rate $\langle J\rangle$ crece con $N$ y satura; como en EDMD.
+        \item A mayor $k$, se necesita menor $\Delta t$ $\rightarrow$ mejor detalle.
+        \item A partir de $k = 10^{2}$, el escalar $\max_N \langle J\rangle$ es independiente de $k$, indicando que la rigidez no afecta el proceso de escaneo.
     \end{itemize}
 \end{frame}
 
