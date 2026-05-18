@@ -1,6 +1,5 @@
 package ar.edu.itba.sds.sistema2.experiments;
 
-import ar.edu.itba.sds.common.DeterministicRandom;
 import ar.edu.itba.sds.sistema2.physics.CellIndexMethod;
 import ar.edu.itba.sds.sistema2.core.ConfigSeeder;
 import ar.edu.itba.sds.sistema2.physics.EnergyTracker;

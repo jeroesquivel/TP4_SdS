@@ -69,9 +69,8 @@ def main():
 
     ax.set_xlabel(r"$\Delta t$ [s]")
     ax.set_ylabel(r"ECM  $[\mathrm{m}^2]$")
-    ax.set_title(r"ECM vs. paso temporal — oscilador amortiguado")
     ax.invert_xaxis()
-    ax.legend(loc="lower left", frameon=True, framealpha=0.95,
+    ax.legend(loc="upper right", frameon=True, framealpha=0.95,
               handlelength=2.2)
 
     out = FIGURES / "02_s1_ecm_vs_dt.png"

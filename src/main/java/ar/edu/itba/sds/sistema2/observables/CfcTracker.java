@@ -35,10 +35,7 @@ public final class CfcTracker {
             if (xiBor > 0.0) {
                 if (!p.inContactBorder) {
                     p.inContactBorder = true;
-                    if (p.state == Particle.USED) {
-                        p.state = Particle.FRESH;
-                        if (!p.usedReachedBorder) p.usedReachedBorder = true;
-                    }
+                    if (p.state == Particle.USED) p.state = Particle.FRESH;
                 }
             } else {
                 p.inContactBorder = false;

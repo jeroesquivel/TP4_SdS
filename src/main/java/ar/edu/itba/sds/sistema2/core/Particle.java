@@ -15,7 +15,6 @@ public final class Particle {
     public byte state = FRESH;
     public boolean inContactObs = false;
     public boolean inContactBorder = false;
-    public boolean usedReachedBorder = false;
 
     public Particle(int id, double radius, double mass, double x, double y, double vx, double vy) {
         this.id = id;
@@ -25,13 +24,5 @@ public final class Particle {
         this.vel = new Vec2(vx, vy);
         this.acc = new Vec2();
         this.accPrev = new Vec2();
-    }
-
-    public double radialDot() {
-        return pos.x * vel.x + pos.y * vel.y;
-    }
-
-    public double radialDistance() {
-        return pos.norm();
     }
 }

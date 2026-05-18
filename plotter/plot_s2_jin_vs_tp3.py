@@ -74,22 +74,19 @@ def main():
     ax.errorbar(tp3_j["N"], tp3_j["J_mean"], yerr=tp3_j.get("J_std", 0),
                 fmt="s--", color="#d62728", ecolor="#d62728",
                 capsize=4, lw=1.6, markersize=8, markerfacecolor="white",
-                markeredgewidth=1.8, label="TP3 (EDMD)  J(N)")
+                markeredgewidth=1.8, label="EDMD")
 
     ax.errorbar(tp4_j["N"], tp4_j["J_mean"], yerr=tp4_j["J_std"],
                 fmt="o-", color="#1f77b4", ecolor="#1f77b4",
                 capsize=4, lw=1.8, markersize=8, markerfacecolor="white",
-                markeredgewidth=1.8,
-                label=r"TP4 (DM)  $J(N)$  global")
+                markeredgewidth=1.8, label="DM")
 
     ax.plot(tp4_jin["N"], scale * tp4_jin["J_in"], "^:", color="#2ca02c",
             lw=1.8, markersize=9, markerfacecolor="white", markeredgewidth=1.8,
-            label=rf"TP4  $J^{{in}}(N)$  en $S\!\in\!"
-                  rf"[{S_NEAR_LO},{S_NEAR_HI}]$ m  ($\times{scale:.1f}$)")
+            label=rf"DM  $J^{{in}}\!\cdot\!{scale:.1f}$")
 
     ax.set_xlabel("N")
-    ax.set_ylabel(r"$J$, $J^{in}$  [partículas / s]   (eje compartido)")
-    ax.set_title(r"Comparación TP3↔TP4: scanning rate global vs. flujo local cerca del obstáculo")
+    ax.set_ylabel(r"$J$, $J^{in}$  [partículas / s]")
     plain_log_axis(ax.xaxis, sorted(set(list(tp4_j["N"]) + list(tp3_j["N"]) + list(tp4_jin["N"]))))
     ax.legend(loc="upper left", frameon=True, framealpha=0.95, handlelength=2.6)
     ax.margins(y=0.10)

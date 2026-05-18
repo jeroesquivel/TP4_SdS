@@ -1,6 +1,7 @@
 package ar.edu.itba.sds.sistema2.experiments;
 
 import ar.edu.itba.sds.common.DeterministicRandom;
+import ar.edu.itba.sds.common.Parallelism;
 import ar.edu.itba.sds.common.Stopwatch;
 import ar.edu.itba.sds.sistema2.physics.CellIndexMethod;
 import ar.edu.itba.sds.sistema2.core.ConfigSeeder;
@@ -30,6 +31,17 @@ public final class KSweepExperiment {
 
     public static void run(double[] ks, int[] Ns, int realizations, double tf, double dt2,
                            long baseSeed, Path outDir, boolean append) throws IOException {
+        int[] ms = new int[ks.length];
+        java.util.Arrays.fill(ms, realizations);
+        run(ks, ms, Ns, tf, dt2, baseSeed, outDir, append);
+    }
+
+    /** Variante con M por k (mismo orden que ks). */
+    public static void run(double[] ks, int[] mPerK, int[] Ns, double tf, double dt2,
+                           long baseSeed, Path outDir, boolean append) throws IOException {
+        if (ks.length != mPerK.length) {
+            throw new IllegalArgumentException("ks y mPerK deben tener el mismo largo");
+        }
         Path csv = outDir.resolve("k_sweep.csv");
         boolean writeHeader = !append || !Files.exists(csv);
         Stopwatch swTotal = new Stopwatch().start();
@@ -37,7 +49,9 @@ public final class KSweepExperiment {
             if (writeHeader) CsvWriter.writeLine(w, "k,N,J_mean,J_std,J_in_S2_mean,realizations,tf,dt");
             int totalCombinations = ks.length * Ns.length;
             AtomicInteger doneCombinations = new AtomicInteger(0);
-            for (double k : ks) {
+            for (int kIdx = 0; kIdx < ks.length; kIdx++) {
+                final double k = ks[kIdx];
+                final int realizations = mPerK[kIdx];
                 final double dt = Geometry.dtForK(k);
                 final int totalSteps = (int) Math.round(tf / dt);
                 Stopwatch swK = new Stopwatch().start();
@@ -58,8 +72,11 @@ public final class KSweepExperiment {
                     final double finalK = k;
                     AtomicInteger doneReal = new AtomicInteger(0);
 
-                    // Realizaciones independientes en paralelo.
-                    IntStream.range(0, realizations).parallel().forEach(r -> {
+                    // Realizaciones independientes en paralelo sobre el pool dedicado.
+                    final int realizationsFinal = realizations;
+                    try {
+                        Parallelism.pool().submit(() ->
+                            IntStream.range(0, realizationsFinal).parallel().forEach(r -> {
                         try {
                             long seed = DeterministicRandom.seedFor(seedBase, finalN, r);
                             List<Particle> ps = ConfigSeeder.seed(finalN, seed);
@@ -110,7 +127,12 @@ public final class KSweepExperiment {
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-                    });
+                    })
+                        ).get();
+                    } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
 
                     double jMean = mean(jValues);
                     double jStd = std(jValues, jMean);

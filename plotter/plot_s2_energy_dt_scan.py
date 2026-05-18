@@ -136,7 +136,6 @@ def main():
         axk.set_ylabel(r"$\Delta E_{tot}/E_0$")
         axk.set_xlim(-100, t_max_k if t_max_k > 0 else 5.0)
         axk.set_ylim(-0.01, 0.2)
-        axk.set_title(rf"Conservación de energía vs. $\Delta t$  —  k = {k_label(k_match)} N/m,  N=800,  $t_f$=2000 s")
         smk = ScalarMappable(norm=norm, cmap=cmap); smk.set_array([])
         cbk = figk.colorbar(smk, ax=axk, fraction=0.040, pad=0.018)
         cbk.set_label(r"$\Delta t$  [s]")
@@ -214,7 +213,6 @@ def main():
                     label=f"k = {k_label(k_match)} N/m")
         ax3k.set_xlabel(r"$\Delta t$  [s]")
         ax3k.set_ylabel(r"$|S_e|$  [s$^{-1}$]")
-        ax3k.set_title(rf"Pendiente del error $S_e$ vs. $\Delta t$  —  k = {k_label(k_match)} N/m,  N=800,  $t_f$=2000 s")
         ax3k.legend(loc="upper left", frameon=True, framealpha=0.95, handlelength=2.2)
         out3k = FIGURES / "03f_s2_energy_dt_slope_k1e3.png"
         fig3k.savefig(out3k)

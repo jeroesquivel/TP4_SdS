@@ -63,7 +63,6 @@ def main():
 
     ax.set_xlabel("t [s]")
     ax.set_ylabel(r"$C_{fc}(t)$  (acumulado)")
-    ax.set_title(r"Cambios de estado fresca→usada — k=10$^3$ N/m, M=100 realizaciones")
     ax.set_xlim(0, t_max)
     ax.set_ylim(0, cfc_max * 1.05)
     ax.legend(loc="upper left", frameon=True, framealpha=0.92, handlelength=1.6)

@@ -3,12 +3,17 @@ package ar.edu.itba.sds.common;
 import java.util.concurrent.ForkJoinPool;
 
 /**
- * Configura el ForkJoinPool global para usar ~90% de los núcleos disponibles.
- * Se llama una vez al inicio de cada Main (Main1 / Main2). Override por
- * variable de entorno {@code TP4_PARALLELISM} si se quiere otra cantidad.
+ * Crea un ForkJoinPool dedicado con ~90% de los cores. Override via
+ * variable de entorno {@code TP4_PARALLELISM}.
+ *
+ * No usamos {@link ForkJoinPool#commonPool()} porque su tamaño se fija al
+ * primer acceso y la system property es sensible al orden de inicialización;
+ * en runs reales nos quedó en parallelism=1 sin darnos cuenta.
  */
 public final class Parallelism {
     private Parallelism() {}
+
+    private static volatile ForkJoinPool POOL;
 
     public static int configure() {
         int cores = Runtime.getRuntime().availableProcessors();
@@ -17,15 +22,15 @@ public final class Parallelism {
         if (env != null && !env.isBlank()) {
             parallel = Math.max(1, Integer.parseInt(env.trim()));
         } else {
-            // 90% de los núcleos, piso 1.
             parallel = Math.max(1, (int) Math.floor(cores * 0.9));
         }
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
-                String.valueOf(parallel));
-        // Tocar el pool fuerza la inicialización con el valor que acabamos de setear.
-        int actual = ForkJoinPool.commonPool().getParallelism();
-        System.out.printf("[parallelism] cores=%d  parallel=%d  (commonPool=%d)%n",
-                cores, parallel, actual);
-        return actual;
+        POOL = new ForkJoinPool(parallel);
+        System.out.printf("[parallelism] cores=%d  pool=%d%n", cores, parallel);
+        return parallel;
+    }
+
+    public static ForkJoinPool pool() {
+        if (POOL == null) configure();
+        return POOL;
     }
 }

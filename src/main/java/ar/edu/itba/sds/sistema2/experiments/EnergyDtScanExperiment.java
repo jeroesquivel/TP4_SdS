@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 public final class EnergyDtScanExperiment {
     private EnergyDtScanExperiment() {}

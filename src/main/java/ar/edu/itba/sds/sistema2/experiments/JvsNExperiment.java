@@ -49,15 +49,13 @@ public final class JvsNExperiment {
                                  long baseSeed, Path outDir, boolean writePerRealization,
                                  double radialTMin) throws IOException {
         int totalSteps = (int) Math.round(tf / dt);
-        int sampleEverySteps = Math.max(1, (int) Math.round(dt2 / dt));
-        int snapshotEvery = sampleEverySteps;
+        int snapshotEvery = Math.max(1, (int) Math.round(dt2 / dt));
         int energyEvery = Math.max(1, totalSteps / 1000);
         int cfcCsvEvery = Math.max(1, totalSteps / 5000);
 
         double[] jValues = new double[realizations];
-        // Matrices per-bin × realization para calcular std al final.
-        int nBinsTmp = new RadialProfileAccumulator().nBins();
-        final int nBins = nBinsTmp;
+        // Matrices per-bin × realización para calcular std al final.
+        final int nBins = new RadialProfileAccumulator().nBins();
         final double[][] rhoPerReal = new double[realizations][nBins];
         final double[][] vPerReal = new double[realizations][nBins];
         final double[][] jInPerReal = new double[realizations][nBins];

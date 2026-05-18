@@ -73,7 +73,16 @@ public final class Main2 {
                 double[] ks = parseDoubles(opts.getOrDefault("ks", "100,1000,10000"));
                 int[] Ns = parseInts(opts.getOrDefault("Ns", "100,200,300,400,500,600,700,800,900,1000"));
                 double dt2 = Double.parseDouble(opts.getOrDefault("dt2", "0.05"));
-                KSweepExperiment.run(ks, Ns, realizations, tf, dt2, baseSeed, out, append);
+                if (opts.containsKey("ms")) {
+                    int[] ms = parseInts(opts.get("ms"));
+                    if (ms.length != ks.length) {
+                        System.err.printf("--ms tiene %d valores, --ks tiene %d.%n", ms.length, ks.length);
+                        System.exit(1);
+                    }
+                    KSweepExperiment.run(ks, ms, Ns, tf, dt2, baseSeed, out, append);
+                } else {
+                    KSweepExperiment.run(ks, Ns, realizations, tf, dt2, baseSeed, out, append);
+                }
             }
             default -> {
                 System.err.println("Unknown experiment: " + experiment);

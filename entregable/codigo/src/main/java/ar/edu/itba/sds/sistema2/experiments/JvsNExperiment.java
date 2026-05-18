@@ -1,6 +1,7 @@
 package ar.edu.itba.sds.sistema2.experiments;
 
 import ar.edu.itba.sds.common.DeterministicRandom;
+import ar.edu.itba.sds.common.Parallelism;
 import ar.edu.itba.sds.common.Stopwatch;
 import ar.edu.itba.sds.sistema2.physics.CellIndexMethod;
 import ar.edu.itba.sds.sistema2.core.ConfigSeeder;
@@ -25,24 +26,47 @@ import java.util.stream.IntStream;
 public final class JvsNExperiment {
     private JvsNExperiment() {}
 
-    public record Result(int N, double jMean, double jStd, RadialProfileAccumulator radial) {}
+    /** Stats radiales per-bin agregadas sobre realizaciones (mean ± std). */
+    public static final class RadialStats {
+        public final double[] sCenter;
+        public final double[] rhoMean, rhoStd;
+        public final double[] vMean, vStd;
+        public final double[] jInMean, jInStd;
+        public final long[] nSamples;
+        public RadialStats(int nBins) {
+            sCenter = new double[nBins];
+            rhoMean = new double[nBins]; rhoStd = new double[nBins];
+            vMean = new double[nBins]; vStd = new double[nBins];
+            jInMean = new double[nBins]; jInStd = new double[nBins];
+            nSamples = new long[nBins];
+        }
+        public int nBins() { return sCenter.length; }
+    }
+
+    public record Result(int N, double jMean, double jStd, RadialStats radial) {}
 
     public static Result runForN(int N, int realizations, double k, double tf, double dt, double dt2,
                                  long baseSeed, Path outDir, boolean writePerRealization,
                                  double radialTMin) throws IOException {
         int totalSteps = (int) Math.round(tf / dt);
-        int sampleEverySteps = Math.max(1, (int) Math.round(dt2 / dt));
-        int snapshotEvery = sampleEverySteps;
+        int snapshotEvery = Math.max(1, (int) Math.round(dt2 / dt));
         int energyEvery = Math.max(1, totalSteps / 1000);
         int cfcCsvEvery = Math.max(1, totalSteps / 5000);
 
         double[] jValues = new double[realizations];
-        RadialProfileAccumulator sharedRadial = new RadialProfileAccumulator();
+        // Matrices per-bin × realización para calcular std al final.
+        final int nBins = new RadialProfileAccumulator().nBins();
+        final double[][] rhoPerReal = new double[realizations][nBins];
+        final double[][] vPerReal = new double[realizations][nBins];
+        final double[][] jInPerReal = new double[realizations][nBins];
+        final long[][] samplesPerReal = new long[realizations][nBins];
         AtomicInteger done = new AtomicInteger(0);
         Stopwatch swAll = new Stopwatch().start();
 
-        // Realizaciones independientes — se ejecutan en paralelo.
-        IntStream.range(0, realizations).parallel().forEach(r -> {
+        // Realizaciones independientes en paralelo sobre el pool dedicado.
+        try {
+            Parallelism.pool().submit(() ->
+                IntStream.range(0, realizations).parallel().forEach(r -> {
             try {
                 long seed = DeterministicRandom.seedFor(baseSeed, N, r);
                 List<Particle> ps = ConfigSeeder.seed(N, seed);
@@ -89,8 +113,15 @@ public final class JvsNExperiment {
 
                 jValues[r] = computeJ(cfc, dt, tf);
                 int finalCfc = cfc.cfcPerStep()[totalSteps];
-                synchronized (sharedRadial) {
-                    sharedRadial.mergeFrom(localRadial);
+                // Capturar el perfil radial de esta realización.
+                for (int b = 0; b < nBins; b++) {
+                    double rho = localRadial.rho(b);
+                    double v = localRadial.vMean(b);
+                    double jin = localRadial.jIn(b);
+                    rhoPerReal[r][b] = rho;
+                    vPerReal[r][b] = Double.isNaN(v) ? 0.0 : v;
+                    jInPerReal[r][b] = jin;
+                    samplesPerReal[r][b] = localRadial.samples(b);
                 }
                 int d = done.incrementAndGet();
                 System.out.printf("[jvsn]     real %2d/%d  J=%.4f  Cfc(tf)=%d  (%.2fs)  [%d/%d done]%n",
@@ -99,14 +130,60 @@ public final class JvsNExperiment {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
+        })
+            ).get();
+        } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
 
         swAll.stop();
         double jMean = mean(jValues);
         double jStd = std(jValues, jMean);
+
+        // Agregar perfiles radiales: mean y std a través de realizaciones,
+        // ignorando bins vacíos para v.
+        RadialStats stats = new RadialStats(nBins);
+        RadialProfileAccumulator template = new RadialProfileAccumulator();
+        for (int b = 0; b < nBins; b++) {
+            stats.sCenter[b] = template.sCenter(b);
+            double sumRho = 0.0, sumJin = 0.0;
+            double sumRho2 = 0.0, sumJin2 = 0.0;
+            int nV = 0;
+            double sumV = 0.0, sumV2 = 0.0;
+            long sumSamples = 0;
+            for (int r = 0; r < realizations; r++) {
+                sumRho += rhoPerReal[r][b];
+                sumRho2 += rhoPerReal[r][b] * rhoPerReal[r][b];
+                sumJin += jInPerReal[r][b];
+                sumJin2 += jInPerReal[r][b] * jInPerReal[r][b];
+                sumSamples += samplesPerReal[r][b];
+                if (samplesPerReal[r][b] > 0) {
+                    sumV += vPerReal[r][b];
+                    sumV2 += vPerReal[r][b] * vPerReal[r][b];
+                    nV++;
+                }
+            }
+            stats.rhoMean[b] = sumRho / realizations;
+            stats.jInMean[b] = sumJin / realizations;
+            stats.nSamples[b] = sumSamples;
+            stats.rhoStd[b] = realizations < 2 ? 0.0 :
+                    Math.sqrt(Math.max(0.0, sumRho2 / realizations - stats.rhoMean[b] * stats.rhoMean[b]) * realizations / (realizations - 1));
+            stats.jInStd[b] = realizations < 2 ? 0.0 :
+                    Math.sqrt(Math.max(0.0, sumJin2 / realizations - stats.jInMean[b] * stats.jInMean[b]) * realizations / (realizations - 1));
+            if (nV > 0) {
+                stats.vMean[b] = sumV / nV;
+                stats.vStd[b] = nV < 2 ? 0.0 :
+                        Math.sqrt(Math.max(0.0, sumV2 / nV - stats.vMean[b] * stats.vMean[b]) * nV / (nV - 1));
+            } else {
+                stats.vMean[b] = 0.0;
+                stats.vStd[b] = 0.0;
+            }
+        }
+
         System.out.printf("[jvsn]   N=%d   ⟨J⟩=%.4f ± %.4f   (M=%d en paralelo: %.1fs)%n",
                 N, jMean, jStd, realizations, swAll.elapsedSeconds());
-        return new Result(N, jMean, jStd, sharedRadial);
+        return new Result(N, jMean, jStd, stats);
     }
 
     public static void runSweep(int[] Ns, int realizations, double k, double tf, double dt, double dt2,
@@ -139,12 +216,14 @@ public final class JvsNExperiment {
     private static void writeRadial(Result res, Path outDir) throws IOException {
         Path csv = outDir.resolve(String.format("radial_N%d.csv", res.N));
         try (BufferedWriter w = CsvWriter.open(csv)) {
-            CsvWriter.writeLine(w, "S,rho,v_in,j_in,n_samples");
+            CsvWriter.writeLine(w, "S,rho,rho_std,v_in,v_in_std,j_in,j_in_std,n_samples");
             for (int b = 0; b < res.radial.nBins(); b++) {
-                CsvWriter.writeLine(w, String.format("%.4f,%.6e,%.6e,%.6e,%d",
-                        res.radial.sCenter(b), res.radial.rho(b),
-                        Double.isNaN(res.radial.vMean(b)) ? 0.0 : res.radial.vMean(b),
-                        res.radial.jIn(b), res.radial.samples(b)));
+                CsvWriter.writeLine(w, String.format("%.4f,%.6e,%.6e,%.6e,%.6e,%.6e,%.6e,%d",
+                        res.radial.sCenter[b],
+                        res.radial.rhoMean[b], res.radial.rhoStd[b],
+                        res.radial.vMean[b], res.radial.vStd[b],
+                        res.radial.jInMean[b], res.radial.jInStd[b],
+                        res.radial.nSamples[b]));
             }
         }
     }
@@ -152,7 +231,7 @@ public final class JvsNExperiment {
     public static double computeJ(CfcTracker cfc, double dt, double tf) {
         int[] cfcArr = cfc.cfcPerStep();
         int total = cfcArr.length - 1;
-        int from = total / 2;
+        int from = 0;                 // ventana completa [0, tf]
         int n = total - from + 1;
         double sumX = 0.0, sumY = 0.0, sumXY = 0.0, sumXX = 0.0;
         for (int i = from; i <= total; i++) {

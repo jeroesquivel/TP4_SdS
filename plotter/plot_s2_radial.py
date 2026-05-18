@@ -82,13 +82,11 @@ def main():
     axes[0].axvspan(S_NEAR_LO, S_NEAR_HI, color="0.85", alpha=0.45, zorder=0)
     axes[0].set_xlabel("S [m]")
     axes[0].set_ylabel(r"$J^{in}(S)$  [m$^{-1}$ s$^{-1}$]")
-    axes[0].set_title("Perfil radial completo")
     axes[0].set_xlim(2.0, s_max)
     axes[0].set_ylim(0, j_max_full * 1.06)
 
     axes[1].set_xlabel("S [m]")
     axes[1].set_ylabel(r"$J^{in}(S)$  [m$^{-1}$ s$^{-1}$]")
-    axes[1].set_title(r"Detalle  $S \in [2,\,5]$ m  (régimen del obstáculo)")
     axes[1].set_xlim(2.0, 5.0)
     axes[1].set_ylim(0, j_max_zoom * 1.06)
 
@@ -96,9 +94,6 @@ def main():
     cbar = fig.colorbar(sm, ax=axes, fraction=0.030, pad=0.015)
     cbar.set_label("N")
     plain_n_colorbar(cbar, Ns)
-
-    fig.suptitle(r"Perfiles radiales — k=10$^3$ N/m, M=100, ventana t $\in$ [t$_f$/2, t$_f$]",
-                 y=0.995, fontsize=14)
 
     out = FIGURES / "07_s2_radial.png"
     fig.savefig(out)
@@ -114,30 +109,33 @@ def main():
     near = pd.DataFrame(rows).sort_values("N").dropna()
     Ns_sorted = sorted(near["N"])
 
-    # Tres paneles apilados verticalmente — eje X (N) compartido.
+    # Tres paneles horizontales — eje X (N) compartido. Cada observable
+    # con su propio eje Y para que las barras de error no se superpongan.
     fig2, (ax_j, ax_rho, ax_v) = plt.subplots(
-        3, 1, figsize=(10.0, 10.5), sharex=True,
-        gridspec_kw={"hspace": 0.12})
+        1, 3, figsize=(15.0, 5.2), sharex=True,
+        gridspec_kw={"wspace": 0.28})
 
     ax_j.errorbar(near["N"], near["j"], yerr=near["j_e"],
                   fmt="o-", color="#1f77b4", ecolor="#1f77b4", capsize=3, lw=2.0,
                   markersize=8, markerfacecolor="white", markeredgewidth=1.8)
     ax_j.set_ylabel(r"$\langle J^{in} \rangle$  [m$^{-1}$ s$^{-1}$]")
+    ax_j.set_xlabel("N")
 
     ax_rho.errorbar(near["N"], near["rho"], yerr=near["rho_e"],
                     fmt="s--", color="#2ca02c", ecolor="#2ca02c", capsize=3, lw=2.0,
                     markersize=8, markerfacecolor="white", markeredgewidth=1.8)
     ax_rho.set_ylabel(r"$\langle \rho^{f,in} \rangle$  [m$^{-2}$]")
+    ax_rho.set_xlabel("N")
 
     ax_v.errorbar(near["N"], near["v"], yerr=near["v_e"],
                   fmt="^:", color="#d62728", ecolor="#d62728", capsize=3, lw=2.0,
                   markersize=8, markerfacecolor="white", markeredgewidth=1.8)
     ax_v.set_ylabel(r"$|\langle v^{f,in} \rangle|$  [m/s]")
     ax_v.set_xlabel("N")
-    plain_log_axis(ax_v.xaxis, Ns_sorted)
 
-    fig2.suptitle(r"Capa cercana al obstáculo  $S\!\in\![{:.1f},\,{:.1f}]$ m  vs. N".format(
-        S_NEAR_LO, S_NEAR_HI), fontsize=13, y=0.995)
+    for ax in (ax_j, ax_rho, ax_v):
+        plain_log_axis(ax.xaxis, Ns_sorted)
+
 
     out2 = FIGURES / "08_s2_radial_near.png"
     fig2.savefig(out2)

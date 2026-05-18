@@ -8,12 +8,10 @@ def main():
     df = df[df["N"] % 100 == 0]
     fig, ax = plt.subplots(figsize=(8.4, 5.0))
 
-    m_tp4 = int(df["realizations"].iloc[0]) if "realizations" in df.columns else 10
     ax.errorbar(df["N"], df["J_mean"], yerr=df["J_std"],
                 fmt="o-", color="#1f77b4", ecolor="#1f77b4",
                 capsize=4, lw=1.8, markersize=7, markerfacecolor="white",
-                markeredgewidth=1.8,
-                label=fr"TP4 (DM, k=10$^3$ N/m, M={m_tp4})")
+                markeredgewidth=1.8, label="TP4 (DM)")
 
     tp3 = TP3_DATA / "j_vs_n.csv"
     if tp3.exists():
@@ -26,7 +24,6 @@ def main():
 
     ax.set_xlabel("N")
     ax.set_ylabel(r"$\langle J \rangle$  [partículas / s]")
-    ax.set_title(r"Scanning rate  $\langle J \rangle$  vs.  N")
     plain_log_axis(ax.xaxis, sorted(df["N"]))
     ax.margins(y=0.10)
     ax.legend(loc="upper left", frameon=True, framealpha=0.95, handlelength=2.2)

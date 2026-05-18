@@ -108,60 +108,16 @@
 \section{Sistema 1}
 
 \begin{frame}{Trayectorias $r(t)$ -- numérica vs.\ analítica}
-    \begin{columns}[T]
-        \begin{column}{0.68\textwidth}
-            \centering
-            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/01_s1_r_vs_t.png}
-        \end{column}
-        \begin{column}{0.32\textwidth}
-            \textbf{Parámetros}
-            \begin{itemize}\setlength\itemsep{2pt}
-                \item $m = \SI{70}{kg}$
-                \item $k = \SI{e4}{N/m}$
-                \item $\gamma = \SI{100}{kg/s}$
-                \item $r(0) = \SI{1}{m}$
-                \item $v(0) = -\tfrac{A\gamma}{2m}$
-                \item $\Delta t = \SI{e-3}{s}$
-                \item $t_f = \SI{5}{s}$
-            \end{itemize}
-            \vspace{0.2cm}
-            \textbf{Observación}
-            \begin{itemize}\setlength\itemsep{2pt}
-                \item Gear-5 y Beeman PC superponen la analítica.
-                \item Euler PC y Verlet visibles a $\Delta t = \SI{e-3}{s}$.
-            \end{itemize}
-        \end{column}
-    \end{columns}
+    \centering
+    \includegraphics[width=0.95\linewidth,height=0.78\textheight,keepaspectratio]{figures/01_s1_r_vs_t.png}
+
+    \vspace{0.1cm}
+    {\footnotesize $m=70$ kg, $k=10^4$ N/m, $\gamma=100$ kg/s, $r(0)=1$ m, $v(0)=-A\gamma/(2m)$, $\Delta t=10^{-3}$ s, $t_f=5$ s}
 \end{frame}
 
 \begin{frame}{Error cuadrático medio vs.\ $\Delta t$}
-    \begin{columns}[T]
-        \begin{column}{0.68\textwidth}
-            \centering
-            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/02_s1_ecm_vs_dt.png}
-        \end{column}
-        \begin{column}{0.32\textwidth}
-            \textbf{ECM}\\[2pt]
-            \resizebox{\linewidth}{!}{%
-              $\mathrm{ECM} = \dfrac{1}{N_{\text{pasos}}}\sum_n\bigl(r^{\text{num}}_n - r^{\text{ana}}_n\bigr)^2$%
-            }
-            \vspace{0.15cm}
-
-            \textbf{Pendientes (log-log)}
-            \begin{itemize}\setlength\itemsep{1pt}
-                \item Euler PC: $\approx 2$
-                \item Verlet (v lageada): $\approx 2$
-                \item Beeman PC: $\approx 4$
-                \item Gear-5 ($\alpha_0 = 3/16$): $\approx 10$
-            \end{itemize}
-            \vspace{0.1cm}
-            \textbf{Conclusión}
-            \begin{itemize}\setlength\itemsep{1pt}
-                \item Gear-5 minimiza el ECM con mayor orden.
-                \item Piso numérico para $\Delta t \lesssim \SI{e-3}{s}$.
-            \end{itemize}
-        \end{column}
-    \end{columns}
+    \centering
+    \includegraphics[width=0.85\linewidth,height=0.82\textheight,keepaspectratio]{figures/02_s1_ecm_vs_dt.png}
 \end{frame}
 
 % =============================================================================
@@ -225,6 +181,55 @@
 % --- Implementación ----------------------------------------------------------
 \sectiondivider{Implementación}
 
+\begin{frame}{Arquitectura del proyecto}
+    \centering
+    \begin{tikzpicture}[
+        font=\footnotesize,
+        node distance=4mm and 5mm,
+        every node/.style={align=center, rounded corners=2pt, inner sep=3pt},
+        entry/.style ={draw, fill=blue!12,   minimum width=22mm, minimum height=7mm},
+        sim/.style   ={draw, fill=blue!25,   minimum width=28mm, minimum height=8mm},
+        mod/.style   ={draw, fill=gray!12,   minimum width=28mm, minimum height=6.5mm},
+        csvbox/.style={draw, fill=orange!18, minimum width=28mm, minimum height=7mm},
+        post/.style  ={draw, dashed, fill=gray!06, minimum width=28mm, minimum height=7mm},
+        flow/.style  ={-{Latex[length=1.6mm]}, semithick, gray!70!black},
+    ]
+        % --- Sistema 1 (izquierda) ---
+        \node[entry] (m1) {\textbf{\texttt{Main1}}\\\scriptsize ECM($\Delta t$)};
+        \node[sim, below=of m1] (s1) {\texttt{sim/Simulator}\\\scriptsize oscilador 1D};
+        \node[mod, below=of s1] (i1) {\texttt{integrators/}\\\scriptsize Euler -- Verlet -- Beeman -- Gear-5};
+
+        % --- Sistema 2 (derecha) ---
+        \node[entry, right=22mm of m1] (m2) {\textbf{\texttt{Main2}}\\\scriptsize \texttt{-{}-experiment}};
+        \node[mod, below=8mm of m2, fill=blue!06, minimum width=58mm] (exp)
+            {\texttt{experiments/}: \texttt{energy\_dt\_scan} $\cdot$ \texttt{timing} $\cdot$ \texttt{jvsn} $\cdot$ \texttt{ksweep}};
+        \node[sim, below=of exp] (s2) {\texttt{sim/Simulator2D}\\\scriptsize loop $\Delta t$ con \emph{hook} por paso};
+        \node[mod, below left=4mm and -10mm of s2] (i2) {\texttt{integrators/}\\\scriptsize Velocity-Verlet $\cdot$ Beeman};
+        \node[mod, below=of s2] (ph) {\texttt{physics/}\\\scriptsize \texttt{ForceModel} $\cdot$ \texttt{CellIndexMethod}};
+        \node[mod, below right=4mm and -10mm of s2] (ob) {\texttt{observables/}\\\scriptsize \texttt{CfcTracker} $\cdot$ perfiles radiales};
+
+        % --- Salida + postproceso ---
+        \node[csvbox, below=18mm of ph] (csv) {CSV (\texttt{results/})};
+        \node[post, right=8mm of csv] (plot) {\texttt{plotter/} (Python)\\\scriptsize no entregable};
+
+        % --- Flechas ---
+        \draw[flow] (m1) -- (s1);
+        \draw[flow] (s1) -- (i1);
+        \draw[flow] (m2) -- (exp);
+        \draw[flow] (exp) -- (s2);
+        \draw[flow] (s2) -- (i2);
+        \draw[flow] (s2) -- (ph);
+        \draw[flow] (s2) -- (ob);
+        \draw[flow] (i1.south) |- ($(csv.west)+(-4mm,0)$) -- (csv.west);
+        \draw[flow] (ph) -- (csv);
+        \draw[flow] (csv) -- (plot);
+
+        % --- Etiquetas de columna ---
+        \node[above=1mm of m1, font=\scriptsize\bfseries, text=blue!50!black] {Sistema 1};
+        \node[above=1mm of m2, font=\scriptsize\bfseries, text=blue!50!black] {Sistema 2};
+    \end{tikzpicture}
+\end{frame}
+
 \begin{frame}{Motor de simulación}
     \begin{enumerate}\setlength\itemsep{3pt}
         \item Sembrar $N$ partículas por rejection sampling: posiciones sin
@@ -246,7 +251,29 @@
     \end{enumerate}
     \vspace{0.2cm}
     \textbf{Integrador}: Velocity-Verlet 2D (simpléctico, $\vect{F} = \vect{F}(\vect{x})$).
-    \framecite{Teórica 4 -- slide 17}
+\end{frame}
+
+\begin{frame}{Integradores implementados}
+    \begin{columns}[T]
+        \column{0.50\textwidth}
+        \textbf{Sistema 1} -- $\vect{F}(r,\dot r)$ con dependencia en $\dot r$
+        \begin{itemize}\setlength\itemsep{2pt}
+            \item Euler predictor-corrector
+            \item Verlet original
+            \item Beeman predictor-corrector
+            \item Gear PC orden 5 \quad ($\alpha_0 = 3/16$)
+        \end{itemize}
+        \vspace{0.15cm}
+        {\footnotesize Inicialización analítica de las derivadas superiores en Gear-5 (diferenciando $\ddot r = -(k/m)r - (\gamma/m)\dot r$).}
+        \column{0.50\textwidth}
+        \textbf{Sistema 2} -- $\vect{F}(\vect{x})$ (sólo posiciones)
+        \begin{itemize}\setlength\itemsep{2pt}
+            \item \textbf{Velocity-Verlet 2D} (default, simpléctico)
+            \item Beeman 2D (verificación cruzada)
+        \end{itemize}
+        \vspace{0.15cm}
+        \textbf{Vecinos}: \emph{Cell Index Method} con celda $= 2\,r_{\max}$ (un paso de fuerzas en $\mathcal{O}(N)$).
+    \end{columns}
 \end{frame}
 
 % --- Simulaciones ------------------------------------------------------------
@@ -405,12 +432,7 @@
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
-            \figorplaceholder{figures/03d_s2_energy_dt_scan}%
-                {width=\linewidth,height=0.70\textheight,keepaspectratio}%
-                {Generada por \texttt{plotter/plot\_s2\_energy\_dt\_scan.py} en
-                \texttt{../figures/}. Copiar a \texttt{latex/figures/} o ajustar
-                \texttt{FIGURES} en \texttt{plotter/\_style.py}. Mostrar sólo
-                el panel de $k=10^{3}$ (single-panel para esta slide).}
+            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/03d_s2_energy_dt_scan_k1e3.png}
         \end{column}
         \begin{column}{0.32\textwidth}
             \textbf{Métrica}\\[2pt]
@@ -433,12 +455,7 @@
     \begin{columns}[T]
         \begin{column}{0.68\textwidth}
             \centering
-            \figorplaceholder{figures/03f_s2_energy_dt_slope}%
-                {width=\linewidth,height=0.70\textheight,keepaspectratio}%
-                {Generada por \texttt{plotter/plot\_s2\_energy\_dt\_scan.py}.
-                Copiar a \texttt{latex/figures/}. Idealmente: versión zoom de
-                la curva $k=10^{3}$ con el $\Delta t$ elegido marcado en línea
-                vertical.}
+            \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/03f_s2_energy_dt_slope_k1e3.png}
         \end{column}
         \begin{column}{0.32\textwidth}
             \textbf{$S_e$}\\[2pt]
@@ -454,8 +471,7 @@
             \vspace{0.1cm}
             \textbf{$\Delta t$ elegido} para $k = 10^{3}$:
             $\Delta t = \SI{2.0e-3}{s}$
-            \framecite{Revisar valor con el plot de $S_e$ -- ver \texttt{PLANPPT.md}}
-        \end{column}
+\end{column}
     \end{columns}
 \end{frame}
 
@@ -483,7 +499,6 @@
             \end{itemize}
         \end{column}
     \end{columns}
-    \framecite{TP3 propio del grupo -- mismo $t_f$}
 \end{frame}
 
 % =============================================================================
@@ -511,6 +526,13 @@
             \includegraphics[width=\linewidth,height=0.70\textheight,keepaspectratio]{figures/06_s2_j_vs_n.png}
         \end{column}
         \begin{column}{0.32\textwidth}
+            \textbf{Parámetros}
+            \begin{itemize}\setlength\itemsep{1pt}
+                \item $k = 10^{3}$ \si{N/m}
+                \item $M = 100$ realizaciones
+                \item Barras: $\sigma$ sobre realizaciones
+            \end{itemize}
+            \vspace{0.2cm}
             \textbf{Observación}
             \begin{itemize}\setlength\itemsep{1pt}
                 \item Crece y satura con $N$.
@@ -526,17 +548,16 @@
 % =============================================================================
 \begin{frame}{Perfiles radiales -- $J_{\text{in}}(S)$}
     \begin{center}
-        \includegraphics[width=0.96\linewidth,height=0.78\textheight,keepaspectratio]{figures/07_s2_radial.png}
+        \includegraphics[width=0.92\linewidth,height=0.74\textheight,keepaspectratio]{figures/07_s2_radial.png}
     \end{center}
+    {\footnotesize $k = 10^3$ N/m \quad $M = 100$ realizaciones \quad ventana $t \in [t_f/2,\,t_f]$ \quad capas $\mathrm{d}S = \SI{0.2}{m}$}
 \end{frame}
 
 \begin{frame}{Observables radiales cerca del obstáculo vs.\ $N$}
-    \begin{columns}[T]
-        \begin{column}{0.98\textwidth}
-            \centering
-            \includegraphics[width=\linewidth,height=0.78\textheight,keepaspectratio]{figures/08_s2_radial_near.png}
-        \end{column}
-    \end{columns}
+    \centering
+    \includegraphics[width=0.92\linewidth,height=0.74\textheight,keepaspectratio]{figures/08_s2_radial_near.png}
+
+    {\footnotesize Capa cercana al obstáculo $S \in [1.5,\,3.0]$ m, ponderado por $n_{\text{samples}}$. $k = 10^3$ N/m, $M = 100$ realizaciones.}
 \end{frame}
 
 % =============================================================================
@@ -605,7 +626,6 @@
         \item Mismo estudio que para $k = 10^{3}$: evolución de $\Delta E_{\text{tot}}/E_0$ vs.\ $t$ por $\Delta t$,
               pendiente $S_e$ vs.\ $\Delta t$.
     \end{itemize}
-    \framecite{Valores a refinar con el análisis de $S_e$ -- ver \texttt{PLANPPT.md}}
 \end{frame}
 
 \begin{frame}{Scanning rate $\langle J\rangle$ y flujo $\langle J_{\text{in}}|_{S\sim 2}\rangle$ vs.\ $N$ -- barrido en $k$}

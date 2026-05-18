@@ -44,9 +44,7 @@ def main():
     for ax in axes[:, 0]:
         ax.set_ylabel("r [m]")
 
-    fig.suptitle(r"Trayectoria r(t) — $\Delta t = 10^{-3}$ s",
-                 y=0.995, fontsize=14)
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    fig.tight_layout()
 
     out = FIGURES / "01_s1_r_vs_t.png"
     fig.savefig(out)

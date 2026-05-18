@@ -49,16 +49,12 @@ def main():
         plain_log_axis(ax.xaxis, Ns_all)
 
     axes[0].set_ylabel(r"$\langle J \rangle$  [partículas / s]")
-    axes[0].set_title(r"Scanning rate global  $\langle J \rangle (N, k)$")
     axes[1].set_ylabel(r"$\langle J^{in} | S\!\sim\!2 \rangle$  [m$^{-1}$ s$^{-1}$]")
-    axes[1].set_title(r"$\langle J^{in} | S\!\sim\!2 \rangle (N, k)$  —  capa cercana")
 
     sm = ScalarMappable(norm=norm, cmap=cmap); sm.set_array([])
     cbar = fig.colorbar(sm, ax=axes, fraction=0.030, pad=0.015)
     cbar.set_label("k [N/m]")
 
-    fig.suptitle(r"Variación con la rigidez k  —  M$=$100 (k$\leq$10$^3$), 30 (k$=$10$^4$), 50 (k$=$10$^5$),  t$_f$=500 s",
-                 y=0.995, fontsize=14)
 
     out = FIGURES / "09_s2_k_sweep.png"
     fig.savefig(out)
@@ -104,10 +100,9 @@ def main():
 
     lines = [l1, l2[0]]
     labels = [r"$\max_N \langle J \rangle$", r"$N^\star$  (argmax$_N$)"]
-    ax.legend(lines, labels, loc="lower right", frameon=True, framealpha=0.95,
+    ax.legend(lines, labels, loc="upper right", frameon=True, framealpha=0.95,
               handlelength=2.2)
 
-    ax.set_title("Escalar característico vs. k")
 
     out2 = FIGURES / "10_s2_k_scalar.png"
     fig2.savefig(out2)
