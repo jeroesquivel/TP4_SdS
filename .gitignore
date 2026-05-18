@@ -59,6 +59,7 @@ dkms.conf
 target/
 *.class
 *.iml
+*.mp4
 
 # Project outputs
 
@@ -73,3 +74,4 @@ venv/
 
 /results
 /tp3_data
+/entregable/presentacion/videos/k=100.mp4

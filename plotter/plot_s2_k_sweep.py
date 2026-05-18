@@ -13,9 +13,13 @@ def k_label(k):
     return rf"$10^{{{e}}}$"
 
 
+K_ALLOWED = [10.0, 100.0, 1000.0, 10000.0, 100000.0]
+
+
 def main():
     df = pd.read_csv(RESULTS / "s2" / "k_sweep.csv")
     df = df[df["N"] % 100 == 0]
+    df = df[df["k"].isin(K_ALLOWED)]
     ks = sorted(df["k"].unique())
     cmap = get_cmap(GRADIENT_CMAP)
     norm = LogNorm(vmin=min(ks), vmax=max(ks))
@@ -53,7 +57,7 @@ def main():
     cbar = fig.colorbar(sm, ax=axes, fraction=0.030, pad=0.015)
     cbar.set_label("k [N/m]")
 
-    fig.suptitle(r"Variación con la rigidez k  —  M=10 realizaciones,  t$_f$=500 s",
+    fig.suptitle(r"Variación con la rigidez k  —  M$=$100 (k$\leq$10$^3$), 30 (k$=$10$^4$), 50 (k$=$10$^5$),  t$_f$=500 s",
                  y=0.995, fontsize=14)
 
     out = FIGURES / "09_s2_k_sweep.png"

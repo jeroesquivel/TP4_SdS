@@ -14,11 +14,14 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-FPS="${FPS:-25}"
-TF="${TF:-6}"
+CAPTURE_FPS="${CAPTURE_FPS:-${FPS:-25}}"  # frames por segundo de simulación capturados
+PLAY_FPS="${PLAY_FPS:-${FPS:-25}}"        # fps de reproducción del mp4
+TF="${TF:-30}"
 WIDTH="${WIDTH:-480}"
 K="${K:-1000}"
 KEEP_PNG="${KEEP_PNG:-0}"   # poner KEEP_PNG=1 para no borrar los frames sueltos
+SPEEDUP=$(awk "BEGIN { print $PLAY_FPS / $CAPTURE_FPS }")
+echo "  capture=${CAPTURE_FPS} fps_sim,  play=${PLAY_FPS} fps  →  speedup ${SPEEDUP}×"
 
 if ! command -v ffmpeg >/dev/null 2>&1; then
   echo "ERROR: ffmpeg no encontrado. Instalá con 'brew install ffmpeg'." >&2
@@ -33,18 +36,18 @@ for N in 100 1000; do
   MP4_OUT="latex/videos/N=${N}.mp4"
   POSTER="latex/figures/N=${N}.png"
 
-  echo "→ Renderizando frames N=${N} (fps=${FPS}, tf=${TF}s, width=${WIDTH}px)"
+  echo "→ Renderizando frames N=${N} (capture=${CAPTURE_FPS} fps_sim, tf=${TF}s, width=${WIDTH}px)"
   rm -rf "${PNG_DIR}"
   mvn -q exec:java \
     -Dexec.mainClass=ar.edu.itba.sds.sistema2.Main2 \
-    -Dexec.args="--experiment animate --N ${N} --k ${K} --tf ${TF} --fps ${FPS} --width ${WIDTH} --out ${PNG_DIR}"
+    -Dexec.args="--experiment animate --N ${N} --k ${K} --tf ${TF} --fps ${CAPTURE_FPS} --width ${WIDTH} --out ${PNG_DIR}"
 
-  echo "→ Mux PNG → mp4 (${MP4_OUT})"
+  echo "→ Mux PNG → mp4 a ${PLAY_FPS} fps (${MP4_OUT})"
   rm -f "${MP4_OUT}"
   # -pix_fmt yuv420p para compatibilidad amplia (Acrobat, pympress, VLC).
   # -movflags +faststart para que arranque rápido al abrir el PDF.
   ffmpeg -hide_banner -loglevel error -y \
-    -framerate "${FPS}" \
+    -framerate "${PLAY_FPS}" \
     -i "${PNG_DIR}/frame_%d.png" \
     -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
     -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" \

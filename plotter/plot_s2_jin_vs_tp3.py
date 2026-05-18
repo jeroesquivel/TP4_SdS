@@ -37,7 +37,7 @@ def jin_near(radial_csv: Path) -> float:
 def main():
     # --- TP4 J global ---
     tp4_j = pd.read_csv(RESULTS / "s2" / "j_vs_n.csv").sort_values("N")
-    tp4_j = tp4_j[tp4_j["N"] % 100 == 0]  # grilla gruesa (consistente con plot 06)
+    tp4_j = tp4_j[tp4_j["N"] % 100 == 0]
 
     # --- TP4 J^in en anillo cercano ---
     radial_files = sorted((RESULTS / "s2").glob("radial_N*.csv"),

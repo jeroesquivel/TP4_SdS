@@ -47,11 +47,11 @@ public final class FrameExporter {
         int stepsPerFrame = Math.max(1, (int) Math.round(frameDt / dt));
         int totalFrames = (int) Math.round(tf * fps);
 
-        int height = width;
+        int height = width + 18;  // espacio extra abajo para la barra de progreso
         double t = 0.0;
 
         for (int frame = 0; frame < totalFrames; frame++) {
-            writeFrame(particles, width, height, new File(outDir, frameName(frame)));
+            writeFrame(particles, width, height, t, tf, new File(outDir, frameName(frame)));
             for (int s = 0; s < stepsPerFrame; s++) {
                 integ.step(dt);
                 t += dt;
@@ -82,17 +82,22 @@ public final class FrameExporter {
         }
     }
 
-    private static void writeFrame(List<Particle> particles, int w, int h, File out) throws IOException {
+    private static void writeFrame(List<Particle> particles, int w, int h,
+                                   double t, double tf, File out) throws IOException {
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, w, h);
 
-        double size = Math.min(w, h) - 20;
+        // Área de la simulación: w x w (cuadrado en la parte superior)
+        int simH = w;
+        double size = Math.min(w, simH) - 20;
         double cx = w / 2.0;
-        double cy = h / 2.0;
+        double cy = simH / 2.0;
         double scale = size / Geometry.L;
 
         g.setColor(new Color(245, 245, 245));
@@ -115,6 +120,21 @@ public final class FrameExporter {
             e.setFrame(sx - sr, sy - sr, 2 * sr, 2 * sr);
             g.fill(e);
         }
+
+        // ─── Footer: solo barra de progreso (sin texto numérico) ───
+        int barX = 12;
+        int barY = simH + 4;
+        int barW = w - 24;
+        int barH = 8;
+        double frac = Math.min(1.0, Math.max(0.0, t / tf));
+
+        g.setColor(new Color(230, 230, 230));
+        g.fillRect(barX, barY, barW, barH);
+        g.setColor(new Color(180, 180, 180));
+        g.drawRect(barX, barY, barW, barH);
+
+        g.setColor(new Color(40, 110, 220));
+        g.fillRect(barX + 1, barY + 1, Math.max(0, (int) ((barW - 1) * frac)), barH - 1);
 
         g.dispose();
         ImageIO.write(img, "png", out);

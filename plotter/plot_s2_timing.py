@@ -4,31 +4,51 @@ import matplotlib.pyplot as plt
 from _style import RESULTS, FIGURES, TP3_DATA, plain_log_axis
 
 
+OVERLAP_MIN, OVERLAP_MAX = 100, 800  # rango común TP3 ↔ TP4
+
+
+def fit_loglog(df, x_col, y_col, n_min, n_max):
+    sub = df[(df[x_col] >= n_min) & (df[x_col] <= n_max)]
+    slope, intercept = np.polyfit(np.log10(sub[x_col]), np.log10(sub[y_col]), 1)
+    return slope, intercept, sub
+
+
 def main():
     df = pd.read_csv(RESULTS / "s2" / "timing.csv").sort_values("N")
     df = df[df["N"] % 100 == 0]
     fig, ax = plt.subplots(figsize=(8.4, 5.2))
 
-    # TP4 — log-log para mostrar la ley de potencia: lineal en log-log ⇒
-    # t_exec ∝ N^α (corrección TP3 D23: "lineal en log-log = ley de potencia,
-    # no exponencial").
-    slope, intercept = np.polyfit(np.log10(df["N"]), np.log10(df["t_exec_s"]), 1)
-    label_tp4 = f"TP4 (DM, Velocity-Verlet)   m = {slope:.2f}"
+    # TP4 — ajuste sobre el rango común con TP3 (100, 800) para que las
+    # pendientes sean comparables. Datos hasta N=1000 igualmente se grafican.
+    slope4, intercept4, sub4 = fit_loglog(df, "N", "t_exec_s",
+                                          OVERLAP_MIN, OVERLAP_MAX)
+    label_tp4 = (f"TP4 (DM, Velocity-Verlet)   "
+                 fr"$\alpha = {slope4:.2f}$ en $N\in[{OVERLAP_MIN},{OVERLAP_MAX}]$")
     ax.loglog(df["N"], df["t_exec_s"], "o-", color="#1f77b4", lw=2.0,
                 markersize=9, markerfacecolor="white", markeredgewidth=1.8,
                 label=label_tp4)
 
-    n_span = np.array([df["N"].min(), df["N"].max()])
-    ax.loglog(n_span, 10 ** (slope * np.log10(n_span) + intercept),
+    n_span4 = np.array([sub4["N"].min(), sub4["N"].max()])
+    ax.loglog(n_span4, 10 ** (slope4 * np.log10(n_span4) + intercept4),
                 ":", color="#1f77b4", lw=1.2, alpha=0.6)
 
-    # TP3
+    # TP3 — ajuste estrictamente sobre el overlap; los puntos chicos
+    # (N<100) están dominados por warmup JIT y distorsionan la pendiente
+    # global.
     tp3 = TP3_DATA / "timing.csv"
+    d3 = None
     if tp3.exists():
         d3 = pd.read_csv(tp3).sort_values("N")
-        if len(d3) >= 2:
-            slope3, _ = np.polyfit(np.log10(d3["N"]), np.log10(d3["t_exec"]), 1)
-            label_tp3 = f"TP3 (EDMD)   m = {slope3:.2f}"
+        overlap3 = d3[(d3["N"] >= OVERLAP_MIN) & (d3["N"] <= OVERLAP_MAX)]
+        if len(overlap3) >= 2:
+            slope3, intercept3 = np.polyfit(np.log10(overlap3["N"]),
+                                            np.log10(overlap3["t_exec"]), 1)
+            label_tp3 = (f"TP3 (EDMD)   "
+                         fr"$\alpha = {slope3:.2f}$ en $N\in[{OVERLAP_MIN},{OVERLAP_MAX}]$")
+            n_span3 = np.array([overlap3["N"].min(), overlap3["N"].max()])
+            ax.loglog(n_span3,
+                      10 ** (slope3 * np.log10(n_span3) + intercept3),
+                      ":", color="#d62728", lw=1.2, alpha=0.6)
         else:
             label_tp3 = "TP3 (EDMD)"
         ax.loglog(d3["N"], d3["t_exec"], "s--", color="#d62728", lw=1.6,
@@ -38,12 +58,16 @@ def main():
     ax.set_xlabel("N")
     ax.set_ylabel(r"$t_{exec}$  [s]")
     ax.set_title(r"Tiempo de ejecución vs. N  —  t$_f$=500 s,  k=10$^3$ N/m")
-    plain_log_axis(ax.xaxis, sorted(set(list(df["N"]) + (list(d3["N"]) if tp3.exists() else []))))
+    plain_log_axis(ax.xaxis,
+                   sorted(set(list(df["N"]) + (list(d3["N"]) if d3 is not None else []))))
     ax.legend(loc="upper left", frameon=True, framealpha=0.95, handlelength=2.2)
 
     out = FIGURES / "04_s2_timing.png"
     fig.savefig(out)
     print("→", out)
+    print(f"   TP4 slope (overlap): {slope4:.3f}")
+    if d3 is not None and 'slope3' in locals():
+        print(f"   TP3 slope (overlap): {slope3:.3f}")
 
 
 if __name__ == "__main__":

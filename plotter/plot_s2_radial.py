@@ -1,3 +1,13 @@
+"""Perfiles radiales (Sistema 2 — ítem 1.3).
+
+Genera dos figuras:
+  · 07_s2_radial.png — J^in(S) para todos los N, panel completo + zoom S ∈ [2,5] m.
+  · 08_s2_radial_near.png — capa cercana al obstáculo S ∈ [1.5, 3] m vs. N:
+      - eje izquierdo: ⟨J^in⟩ (azul)
+      - eje izquierdo (segunda curva, misma escala): ⟨ρ^{f,in}⟩ (verde)
+      - eje derecho: |⟨v^{f,in}⟩| (rojo)
+    Doble eje y, según corrección explícita de TP3 D28.
+"""
 import re
 import numpy as np
 import pandas as pd
@@ -18,20 +28,29 @@ def parse_n(name: str) -> int:
 
 
 def near_layer_avg(df, lo=S_NEAR_LO, hi=S_NEAR_HI):
-    """Promedia los bins en S ∈ [lo, hi] usando n_samples como peso (inversamente
-    proporcional a la varianza muestral) — más robusto que un promedio simple
-    cuando los bins lejos del obstáculo tienen muchas más muestras."""
+    """Promedia los bins en S ∈ [lo, hi] ponderando por n_samples.
+
+    Devuelve (rho_mean, rho_std, v_mean, v_std, j_mean, j_std). Si el CSV
+    no tiene columnas std, devuelve 0 para las std.
+    """
     mask = (df["S"] >= lo) & (df["S"] <= hi)
     sub = df[mask]
     if sub.empty:
-        return np.nan, np.nan, np.nan
+        return tuple([np.nan] * 6)
     w = sub["n_samples"].to_numpy()
     if w.sum() == 0:
-        return np.nan, np.nan, np.nan
+        return tuple([np.nan] * 6)
     rho = np.average(sub["rho"], weights=w)
     v = np.average(sub["v_in"], weights=w)
     j = np.average(sub["j_in"], weights=w)
-    return rho, v, j
+    # std promediado: si los bins son ~independientes, std del promedio es
+    # proporcional a sqrt(mean(std²)/N_bins). Usamos eso como cota razonable.
+    def avg_std(col):
+        if col not in sub.columns:
+            return 0.0
+        s2 = (sub[col].to_numpy() ** 2 * w).sum() / w.sum()
+        return float(np.sqrt(s2) / np.sqrt(len(sub)))
+    return rho, avg_std("rho_std"), v, avg_std("v_in_std"), j, avg_std("j_in_std")
 
 
 def main():
@@ -78,45 +97,47 @@ def main():
     cbar.set_label("N")
     plain_n_colorbar(cbar, Ns)
 
-    fig.suptitle(r"Perfiles radiales — k=10$^3$ N/m, t $\geq$ t$_f$/2",
+    fig.suptitle(r"Perfiles radiales — k=10$^3$ N/m, M=100, ventana t $\in$ [t$_f$/2, t$_f$]",
                  y=0.995, fontsize=14)
 
     out = FIGURES / "07_s2_radial.png"
     fig.savefig(out)
     print("→", out)
 
-    # =========== Figura 2: capa cercana vs N (doble eje y) ===========
+    # =========== Figura 2: capa cercana vs N (3 paneles, con barras de error) ===========
     rows = []
     for f, N in zip(files, Ns):
         df = pd.read_csv(f).sort_values("S")
-        rho, v, j = near_layer_avg(df)
-        rows.append({"N": N, "rho": rho, "v": v, "j": j})
-    near = pd.DataFrame(rows).sort_values("N")
+        rho, rho_e, v, v_e, j, j_e = near_layer_avg(df)
+        rows.append({"N": N, "rho": rho, "rho_e": rho_e,
+                     "v": v, "v_e": v_e, "j": j, "j_e": j_e})
+    near = pd.DataFrame(rows).sort_values("N").dropna()
+    Ns_sorted = sorted(near["N"])
 
-    fig2, ax = plt.subplots(figsize=(9.0, 5.4))
-    ax.set_xlabel("N")
-    plain_log_axis(ax.xaxis, sorted(near["N"]))
+    # Tres paneles apilados verticalmente — eje X (N) compartido.
+    fig2, (ax_j, ax_rho, ax_v) = plt.subplots(
+        3, 1, figsize=(10.0, 10.5), sharex=True,
+        gridspec_kw={"hspace": 0.12})
 
-    l1 = ax.plot(near["N"], near["j"], "o-", color="#1f77b4", lw=2.0, markersize=8,
-                 label=r"$\langle J^{in} \rangle$  [m$^{-1}$ s$^{-1}$]")
-    ax.set_ylabel(r"$\langle J^{in} \rangle$  [m$^{-1}$ s$^{-1}$]", color="#1f77b4")
-    ax.tick_params(axis="y", labelcolor="#1f77b4")
+    ax_j.errorbar(near["N"], near["j"], yerr=near["j_e"],
+                  fmt="o-", color="#1f77b4", ecolor="#1f77b4", capsize=3, lw=2.0,
+                  markersize=8, markerfacecolor="white", markeredgewidth=1.8)
+    ax_j.set_ylabel(r"$\langle J^{in} \rangle$  [m$^{-1}$ s$^{-1}$]")
 
-    ax2 = ax.twinx()
-    ax2.spines["top"].set_visible(False)
-    l2 = ax2.plot(near["N"], near["rho"], "s--", color="#2ca02c", lw=1.6, markersize=7,
-                  label=r"$\langle \rho^{f,in} \rangle$  [m$^{-2}$]")
-    l3 = ax2.plot(near["N"], near["v"], "^:", color="#d62728", lw=1.6, markersize=7,
-                  label=r"$|\langle v^{f,in} \rangle|$  [m/s]")
-    ax2.set_ylabel(r"$\langle \rho \rangle$,  $|\langle v \rangle|$", color="0.2")
+    ax_rho.errorbar(near["N"], near["rho"], yerr=near["rho_e"],
+                    fmt="s--", color="#2ca02c", ecolor="#2ca02c", capsize=3, lw=2.0,
+                    markersize=8, markerfacecolor="white", markeredgewidth=1.8)
+    ax_rho.set_ylabel(r"$\langle \rho^{f,in} \rangle$  [m$^{-2}$]")
 
-    ax.set_title(r"Capa cercana al obstáculo  $S\!\in\![{:.1f},\,{:.1f}]$ m  vs. N".format(
-        S_NEAR_LO, S_NEAR_HI))
+    ax_v.errorbar(near["N"], near["v"], yerr=near["v_e"],
+                  fmt="^:", color="#d62728", ecolor="#d62728", capsize=3, lw=2.0,
+                  markersize=8, markerfacecolor="white", markeredgewidth=1.8)
+    ax_v.set_ylabel(r"$|\langle v^{f,in} \rangle|$  [m/s]")
+    ax_v.set_xlabel("N")
+    plain_log_axis(ax_v.xaxis, Ns_sorted)
 
-    lines = l1 + l2 + l3
-    labels = [ln.get_label() for ln in lines]
-    ax.legend(lines, labels, loc="upper left", frameon=True, framealpha=0.95,
-              handlelength=2.2)
+    fig2.suptitle(r"Capa cercana al obstáculo  $S\!\in\![{:.1f},\,{:.1f}]$ m  vs. N".format(
+        S_NEAR_LO, S_NEAR_HI), fontsize=13, y=0.995)
 
     out2 = FIGURES / "08_s2_radial_near.png"
     fig2.savefig(out2)

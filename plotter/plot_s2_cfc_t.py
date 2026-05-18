@@ -59,13 +59,11 @@ def main():
         t_max = max(t_max, t.max())
         cfc_max = max(cfc_max, (mu + sd).max())
 
-    # Ventana de ajuste J: t ∈ [tf/2, tf]
-    ax.axvspan(t_max / 2.0, t_max, color="0.85", alpha=0.45, zorder=0,
-               label="ventana ajuste J")
+    # Ajuste J sobre toda la ventana [0, tf] — no se sombrea ninguna sub-banda.
 
     ax.set_xlabel("t [s]")
     ax.set_ylabel(r"$C_{fc}(t)$  (acumulado)")
-    ax.set_title(r"Cambios de estado fresca→usada — k=10$^3$ N/m, M=10 realizaciones")
+    ax.set_title(r"Cambios de estado fresca→usada — k=10$^3$ N/m, M=100 realizaciones")
     ax.set_xlim(0, t_max)
     ax.set_ylim(0, cfc_max * 1.05)
     ax.legend(loc="upper left", frameon=True, framealpha=0.92, handlelength=1.6)

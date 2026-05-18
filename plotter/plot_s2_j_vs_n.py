@@ -8,11 +8,12 @@ def main():
     df = df[df["N"] % 100 == 0]
     fig, ax = plt.subplots(figsize=(8.4, 5.0))
 
+    m_tp4 = int(df["realizations"].iloc[0]) if "realizations" in df.columns else 10
     ax.errorbar(df["N"], df["J_mean"], yerr=df["J_std"],
                 fmt="o-", color="#1f77b4", ecolor="#1f77b4",
                 capsize=4, lw=1.8, markersize=7, markerfacecolor="white",
                 markeredgewidth=1.8,
-                label=r"TP4 (DM, k=10$^3$ N/m, M=10)")
+                label=fr"TP4 (DM, k=10$^3$ N/m, M={m_tp4})")
 
     tp3 = TP3_DATA / "j_vs_n.csv"
     if tp3.exists():
